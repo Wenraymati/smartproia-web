@@ -1,0 +1,123 @@
+# .cursorrules - SmartProIA Web
+
+## Identidad del Proyecto
+- **Nombre**: SmartProIA Web
+- **Propósito**: Landing page y sitio web corporativo
+- **Stack**: Next.js 16 | React 19 | TailwindCSS 4 | Framer Motion 12
+- **Estado**: 🟡 MVP
+- **URL**: smartproia.com (TBD)
+
+## Archivos Críticos
+- `app/` - Páginas Next.js App Router
+- `components/` - Componentes React
+- `public/` - Assets estáticos
+- `tailwind.config.ts` - Configuración Tailwind
+
+## Enfoque del Proyecto
+
+**Este es un sitio MARKETING/CORPORATIVO:**
+- Prioridad: UX, diseño visual, animaciones
+- Performance: Optimización de imágenes y Core Web Vitals
+- SEO: Metadata, sitemap, structured data
+
+## Reglas
+
+### NUNCA
+- ❌ Imágenes sin optimizar (usar next/image)
+- ❌ Animaciones que bloqueen interacción
+- ❌ Dependencias pesadas innecesarias
+- ❌ Olvidar metadata SEO
+
+### SIEMPRE
+- ✅ Next.js Image con lazy loading
+- ✅ Animaciones con Framer Motion (no CSS animations complejas)
+- ✅ Mobile-first design
+- ✅ Lighthouse score >90
+
+## Convenciones
+
+### Componentes:
+```typescript
+// Hero.tsx
+"use client";
+
+import { motion } from "framer-motion";
+
+export function Hero() {
+  return (
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen"
+    >
+      {/* Content */}
+    </motion.section>
+  );
+}
+```
+
+### Animaciones (Framer Motion):
+- Usa `variants` para animaciones complejas
+- `initial`, `animate`, `exit` siempre
+- Scroll-triggered: usa `useScroll` hook
+
+### Tailwind:
+- Usa utility classes, evita CSS custom
+- Responsive: `sm:` `md:` `lg:` `xl:`
+- Tema: definir colores en `tailwind.config.ts`
+
+## Estructura
+```
+app/
+├── layout.tsx         # Layout raíz con metadata
+├── page.tsx           # Homepage
+├── about/
+│   └── page.tsx
+└── api/
+    └── contact/
+        └── route.ts   # API para formulario
+components/
+├── layout/
+│   ├── Header.tsx
+│   └── Footer.tsx
+├── sections/
+│   ├── Hero.tsx
+│   ├── Features.tsx
+│   └── CTA.tsx
+└── ui/
+    ├── Button.tsx
+    └── Card.tsx
+```
+
+## Performance
+
+### Checklist:
+- [ ] Todas las imágenes con `next/image`
+- [ ] Fonts optimizados con `next/font`
+- [ ] Lazy load componentes pesados
+- [ ] Bundle analyzer ejecutado
+- [ ] Lighthouse CI configurado
+
+## SEO
+
+### Metadata (layout.tsx):
+```typescript
+export const metadata: Metadata = {
+  title: "SmartProIA - Inteligencia Artificial",
+  description: "...",
+  openGraph: {
+    images: ["/og-image.png"],
+  },
+};
+```
+
+## Comandos
+```bash
+npm run dev                    # Desarrollo
+npm run build                  # Build producción
+npm run analyze                # Analizar bundle size
+npx @next/bundle-analyzer      # Visualizar bundles
+```
+
+---
+**Última actualización:** 2026-01-26
