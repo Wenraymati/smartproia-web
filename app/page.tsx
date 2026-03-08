@@ -349,12 +349,8 @@ export default function SmartProIA() {
                 bg: 'bg-green-500/8',
               },
             ].map((s, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
                 className="relative bg-slate-900/50 border border-slate-800 rounded-2xl p-7 hover:border-slate-700 transition-colors"
               >
                 <div className="text-xs font-mono text-slate-700 mb-4">{s.step}</div>
@@ -363,7 +359,7 @@ export default function SmartProIA() {
                 </div>
                 <h3 className="font-bold text-white mb-2">{s.title}</h3>
                 <p className="text-sm text-slate-400 leading-relaxed">{s.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
 
