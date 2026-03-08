@@ -437,7 +437,7 @@ export default function SmartProIA() {
       </section>
 
       {/* ── TESTIMONIOS ── */}
-      <section className="py-28 px-6">
+      <section className="py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <Badge>Testimonios</Badge>
