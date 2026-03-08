@@ -7,9 +7,10 @@ import {
   MessageCircle, TrendingUp, TrendingDown, Minus, Star, ChevronDown
 } from 'lucide-react';
 
-const WA_LINK = "https://wa.me/56962326907?text=Hola%2C%20quiero%20suscribirme%20al%20plan%20PRO%20de%20SmartProIA";
-const WA_BOT  = "https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA";
-const WA_FREE = "https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias";
+const STRIPE_BASIC = "https://buy.stripe.com/test_3cI4gzd6t1Gp1kD65V2go00";
+const STRIPE_PRO   = "https://buy.stripe.com/test_bJe3cvfeB4SBe7pbqf2go01";
+const WA_BOT       = "https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA";
+const WA_FREE      = "https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias";
 
 // Animated counter
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
@@ -400,8 +401,8 @@ export default function SmartProIA() {
                 'Canal Telegram privado',
                 '7 días de prueba gratis',
               ]}
-              cta="Empezar gratis"
-              href={WA_FREE}
+              cta="Suscribirme Básico"
+              href={STRIPE_BASIC}
             />
             <PriceCard
               title="Canal PRO"
@@ -416,7 +417,7 @@ export default function SmartProIA() {
                 'Soporte directo Telegram',
               ]}
               cta="Suscribirme PRO"
-              href={WA_LINK}
+              href={STRIPE_PRO}
             />
             <PriceCard
               title="Bot Propio"
