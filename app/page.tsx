@@ -449,12 +449,8 @@ export default function SmartProIA() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
                 className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6"
               >
                 <div className="flex mb-3">
@@ -467,7 +463,7 @@ export default function SmartProIA() {
                   <div className="text-white font-semibold text-sm">{t.name}</div>
                   <div className="text-slate-600 text-xs">{t.role}</div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
