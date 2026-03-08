@@ -4,10 +4,9 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!; // e.g. -1003809856981
+const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
 
 async function createTelegramInviteLink(): Promise<string> {
-  // Link válido por 7 días, uso único
   const expireDate = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
 
   const res = await fetch(
@@ -93,6 +92,31 @@ async function sendWelcomeEmail(
   }
 }
 
+function detectPlan(amountTotal: number, currency: string): string {
+  // CLP es zero-decimal en Stripe (14223 = $14.223 CLP)
+  // USD es cents (1500 = $15.00 USD)
+  if (currency === "clp") {
+    return amountTotal <= 18000 ? "Básico" : "PRO";
+  }
+  // USD cents
+  if (amountTotal <= 1800) return "Básico";
+  return "PRO";
+}
+
+async function processNewSubscriber(
+  email: string,
+  name: string,
+  amountTotal: number,
+  currency: string,
+  eventType: string
+) {
+  const plan = detectPlan(amountTotal, currency);
+  console.log(`[${eventType}] Processing ${email}, plan: ${plan}, amount: ${amountTotal} ${currency.toUpperCase()}`);
+  const inviteLink = await createTelegramInviteLink();
+  await sendWelcomeEmail(email, name, plan, inviteLink);
+  console.log(`✅ Invite sent to ${email}: ${inviteLink}`);
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
@@ -113,33 +137,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+  try {
+    // Nuevo checkout completado (pago inicial)
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const email = session.customer_details?.email;
+      const name = session.customer_details?.name ?? "";
+      const amountTotal = session.amount_total ?? 0;
+      const currency = session.currency ?? "usd";
 
-    const email = session.customer_details?.email;
-    const name = session.customer_details?.name ?? "";
-    const amountCents = session.amount_total ?? 0;
+      if (!email) {
+        console.error("No customer email in session", session.id);
+        return NextResponse.json({ error: "No email" }, { status: 400 });
+      }
 
-    if (!email) {
-      console.error("No customer email in session", session.id);
-      return NextResponse.json({ error: "No email" }, { status: 400 });
+      await processNewSubscriber(email, name, amountTotal, currency, event.type);
     }
 
-    // Determinar plan por monto (en centavos)
-    let plan = "PRO";
-    if (amountCents === 1500) plan = "Básico";
-    else if (amountCents === 2500) plan = "PRO";
+    // Renovación mensual de suscripción
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object as Stripe.Invoice;
+      // Solo procesar renovaciones (no el primer pago, que ya maneja checkout.session.completed)
+      if (invoice.billing_reason === "subscription_cycle") {
+        const email = invoice.customer_email;
+        const name = (invoice.customer_name as string) ?? "";
+        const amountTotal = invoice.amount_paid ?? 0;
+        const currency = invoice.currency ?? "usd";
 
-    try {
-      console.log(`Processing payment for ${email}, plan: ${plan}`);
-      const inviteLink = await createTelegramInviteLink();
-      await sendWelcomeEmail(email, name, plan, inviteLink);
-      console.log(`✅ Invite sent to ${email}: ${inviteLink}`);
-    } catch (err) {
-      console.error("Error processing webhook:", err);
-      // Retornamos 500 para que Stripe reintente
-      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+        if (!email) {
+          console.error("No customer email in invoice", invoice.id);
+          return NextResponse.json({ error: "No email" }, { status: 400 });
+        }
+
+        await processNewSubscriber(email, name, amountTotal, currency, event.type);
+      }
     }
+  } catch (err) {
+    console.error("Error processing webhook:", err);
+    // Retornamos 500 para que Stripe reintente
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
