@@ -17,9 +17,8 @@ import { MobileNav } from './components/MobileNav';
 import { StickyCTA } from './components/StickyCTA';
 import { LeadModal } from './components/LeadModal';
 
-// Reemplaza estas URLs con tus links de pago de Mercado Pago
-const MP_BASIC = process.env.NEXT_PUBLIC_MP_LINK_BASIC || 'https://mpago.la/BASICO';
-const MP_PRO   = process.env.NEXT_PUBLIC_MP_LINK_PRO   || 'https://mpago.la/PRO';
+const MP_BASIC = 'https://mpago.la/1yEHjwC';
+const MP_PRO   = 'https://mpago.la/2SDFTxc';
 const WA_BOT       = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA';
 const WA_FREE      = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias';
 
