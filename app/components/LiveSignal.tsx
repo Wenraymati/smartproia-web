@@ -5,98 +5,97 @@ import { Minus } from 'lucide-react';
 
 type Coin = 'BTC' | 'ETH' | 'SOL';
 
-const SIGNAL_DATA: Record<Coin, {
-  symbol: string;
-  icon: string;
-  iconColor: string;
-  prices: string[];
-  change: string;
-  changeDir: 'up' | 'down' | 'flat';
-  signal: string;
-  signalColor: string;
-  confluence: string;
-  confluenceColor: string;
-  fearGreed: string;
-  fearGreedColor: string;
+const STATIC: Record<Coin, {
+  symbol: string; icon: string; iconColor: string;
+  signal: string; signalColor: string;
+  confluence: string; confluenceColor: string;
   direction: string;
   news: string[];
   rec: { text: string; cls: string };
 }> = {
   BTC: {
-    symbol: 'BTC/USDT',
-    icon: '₿',
-    iconColor: 'text-orange-400',
-    prices: ['$67,240', '$67,185', '$67,310', '$67,060'],
-    change: '-1.6%',
-    changeDir: 'down',
-    signal: 'CAUTION',
-    signalColor: 'text-yellow-400',
-    confluence: 'BAJA',
-    confluenceColor: 'text-yellow-400',
-    fearGreed: '12 🔴',
-    fearGreedColor: 'text-red-400',
+    symbol: 'BTC/USDT', icon: '₿', iconColor: 'text-orange-400',
+    signal: 'CAUTION', signalColor: 'text-yellow-400',
+    confluence: 'BAJA', confluenceColor: 'text-yellow-400',
     direction: 'NEUTRAL',
-    news: ['USDC supera a Tether en capitalización', 'Bitcoin baja 1.4% en volumen reducido'],
-    rec: {
-      text: '🚫 Señal débil. Preservar capital.',
-      cls: 'bg-red-950/30 border border-red-900/40 text-red-400',
-    },
+    news: ['USDC supera a Tether en capitalización', 'Bitcoin consolida rango semanal'],
+    rec: { text: '🚫 Señal débil. Preservar capital.', cls: 'bg-red-950/30 border border-red-900/40 text-red-400' },
   },
   ETH: {
-    symbol: 'ETH/USDT',
-    icon: 'Ξ',
-    iconColor: 'text-blue-400',
-    prices: ['$3,210', '$3,195', '$3,230', '$3,180'],
-    change: '+0.8%',
-    changeDir: 'up',
-    signal: 'CAUTION',
-    signalColor: 'text-yellow-400',
-    confluence: 'MEDIA',
-    confluenceColor: 'text-yellow-400',
-    fearGreed: '12 🔴',
-    fearGreedColor: 'text-red-400',
+    symbol: 'ETH/USDT', icon: 'Ξ', iconColor: 'text-blue-400',
+    signal: 'CAUTION', signalColor: 'text-yellow-400',
+    confluence: 'MEDIA', confluenceColor: 'text-yellow-400',
     direction: 'LATERAL',
     news: ['EIP-7702 mejora UX de wallets', 'Staking yield baja a 3.1%'],
-    rec: {
-      text: '⚠️ Señales mixtas. Sin entrada clara.',
-      cls: 'bg-yellow-950/30 border border-yellow-900/40 text-yellow-400',
-    },
+    rec: { text: '⚠️ Señales mixtas. Sin entrada clara.', cls: 'bg-yellow-950/30 border border-yellow-900/40 text-yellow-400' },
   },
   SOL: {
-    symbol: 'SOL/USDT',
-    icon: '◎',
-    iconColor: 'text-purple-400',
-    prices: ['$142', '$140', '$145', '$139'],
-    change: '+2.1%',
-    changeDir: 'up',
-    signal: 'GO',
-    signalColor: 'text-green-400',
-    confluence: 'ALTA',
-    confluenceColor: 'text-green-400',
-    fearGreed: '12 🔴',
-    fearGreedColor: 'text-red-400',
+    symbol: 'SOL/USDT', icon: '◎', iconColor: 'text-purple-400',
+    signal: 'GO', signalColor: 'text-green-400',
+    confluence: 'ALTA', confluenceColor: 'text-green-400',
     direction: 'ALCISTA',
     news: ['DeFi TVL en Solana supera $8B', 'Nuevo DEX supera $500M volumen'],
-    rec: {
-      text: '✅ Confluencia alta. Condiciones favorables.',
-      cls: 'bg-green-950/30 border border-green-900/40 text-green-400',
-    },
+    rec: { text: '✅ Confluencia alta. Condiciones favorables.', cls: 'bg-green-950/30 border border-green-900/40 text-green-400' },
   },
 };
 
 const TABS: Coin[] = ['BTC', 'ETH', 'SOL'];
 
+const COIN_KEYS: Record<Coin, string> = { BTC: 'BTC', ETH: 'ETH', SOL: 'SOL' };
+
+function fmt(price: number | null, coin: Coin): string {
+  if (price === null) return '—';
+  if (coin === 'SOL') return `$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+  return `$${price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
+function fmtChange(change: number | null): { text: string; dir: 'up' | 'down' | 'flat' } {
+  if (change === null) return { text: '—', dir: 'flat' };
+  const sign = change >= 0 ? '+' : '';
+  return { text: `${sign}${change.toFixed(2)}%`, dir: change >= 0 ? 'up' : 'down' };
+}
+
+function fgEmoji(label: string): string {
+  if (!label) return '';
+  const l = label.toLowerCase();
+  if (l.includes('extreme fear')) return '🔴';
+  if (l.includes('fear')) return '🟠';
+  if (l.includes('neutral')) return '🟡';
+  if (l.includes('greed') && !l.includes('extreme')) return '🟢';
+  if (l.includes('extreme greed')) return '💚';
+  return '';
+}
+
 export function LiveSignal() {
   const [tab, setTab] = useState<Coin>('BTC');
-  const [tick, setTick] = useState(0);
+  const [prices, setPrices] = useState<Record<string, { price: number | null; change24h: number | null }>>({});
+  const [fearGreed, setFearGreed] = useState<{ value: string; label: string } | null>(null);
 
   useEffect(() => {
-    const t = setInterval(() => setTick((v) => v + 1), 3000);
-    return () => clearInterval(t);
+    async function load() {
+      try {
+        const res = await fetch('/api/prices');
+        if (!res.ok) return;
+        const data = await res.json();
+        setPrices({ BTC: data.BTC, ETH: data.ETH, SOL: data.SOL });
+        setFearGreed(data.fearGreed);
+      } catch { /* keep defaults */ }
+    }
+    load();
+    const interval = setInterval(load, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
-  const d = SIGNAL_DATA[tab];
-  const price = d.prices[tick % d.prices.length];
+  const d = STATIC[tab];
+  const live = prices[COIN_KEYS[tab]];
+  const price = fmt(live?.price ?? null, tab);
+  const { text: changeText, dir: changeDir } = fmtChange(live?.change24h ?? null);
+
+  const fgValue = fearGreed?.value ?? '—';
+  const fgLabel = fearGreed?.label ?? '';
+  const fgColor = fgLabel.toLowerCase().includes('fear') ? 'text-red-400'
+    : fgLabel.toLowerCase().includes('greed') ? 'text-green-400'
+    : 'text-yellow-400';
 
   return (
     <div className="relative">
@@ -137,12 +136,8 @@ export function LiveSignal() {
             </div>
             <div className="text-right">
               <div className="text-white font-bold">{price}</div>
-              <div
-                className={`text-xs ${
-                  d.changeDir === 'up' ? 'text-green-400' : 'text-red-400'
-                }`}
-              >
-                {d.changeDir === 'up' ? '↑' : '↓'} {d.change} 24h
+              <div className={`text-xs ${changeDir === 'up' ? 'text-green-400' : changeDir === 'down' ? 'text-red-400' : 'text-slate-500'}`}>
+                {changeDir === 'up' ? '↑' : changeDir === 'down' ? '↓' : ''} {changeText} 24h
               </div>
             </div>
           </div>
@@ -171,7 +166,9 @@ export function LiveSignal() {
             </div>
             <div className="bg-slate-800/60 rounded-xl p-3">
               <div className="text-slate-500 text-xs mb-1">Fear & Greed</div>
-              <div className={`font-bold ${d.fearGreedColor}`}>{d.fearGreed}</div>
+              <div className={`font-bold ${fgColor}`}>
+                {fgValue} {fgEmoji(fgLabel)}
+              </div>
             </div>
           </div>
 
@@ -179,9 +176,7 @@ export function LiveSignal() {
           <div className="border-t border-slate-800 pt-3 space-y-1.5">
             <div className="text-slate-500 text-xs uppercase tracking-wider mb-2">Noticias</div>
             {d.news.map((n, i) => (
-              <div key={i} className="text-slate-400 text-xs">
-                📰 {n}
-              </div>
+              <div key={i} className="text-slate-400 text-xs">📰 {n}</div>
             ))}
           </div>
 
