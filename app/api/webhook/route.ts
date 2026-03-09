@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: "No email" }, { status: 400 });
         }
 
-        await processNewSubscriber(email, name, amountTotal, currency, event.type, invoice.subscription as string ?? "", invoice.customer as string ?? "");
+        await processNewSubscriber(email, name, amountTotal, currency, event.type, (invoice as any).subscription ?? "", invoice.customer as string ?? "");
       }
     }
   } catch (err) {
