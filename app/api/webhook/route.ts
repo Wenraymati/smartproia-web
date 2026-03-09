@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { Redis } from "@upstash/redis";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
@@ -103,18 +108,48 @@ function detectPlan(amountTotal: number, currency: string): string {
   return "PRO";
 }
 
+async function saveSubscriber(
+  email: string,
+  name: string,
+  plan: string,
+  subscriptionId: string,
+  customerId: string,
+  amountTotal: number,
+  currency: string,
+  inviteLink: string
+) {
+  const subscriber = {
+    email,
+    name,
+    plan,
+    subscriptionId,
+    customerId,
+    amount: amountTotal,
+    currency: currency.toUpperCase(),
+    inviteLink,
+    joinedAt: new Date().toISOString(),
+    status: "active",
+  };
+  await redis.set(`subscriber:${email}`, JSON.stringify(subscriber));
+  await redis.sadd("subscribers", email);
+  console.log(`💾 Saved subscriber: ${email}`);
+}
+
 async function processNewSubscriber(
   email: string,
   name: string,
   amountTotal: number,
   currency: string,
-  eventType: string
+  eventType: string,
+  subscriptionId: string,
+  customerId: string
 ) {
   const plan = detectPlan(amountTotal, currency);
   console.log(`[${eventType}] Processing ${email}, plan: ${plan}, amount: ${amountTotal} ${currency.toUpperCase()}`);
   const inviteLink = await createTelegramInviteLink();
   await sendWelcomeEmail(email, name, plan, inviteLink);
-  console.log(`✅ Invite sent to ${email}: ${inviteLink}`);
+  await saveSubscriber(email, name, plan, subscriptionId, customerId, amountTotal, currency, inviteLink);
+  console.log(`✅ Done: ${email} → ${plan} → ${inviteLink}`);
 }
 
 export async function POST(req: NextRequest) {
@@ -151,7 +186,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No email" }, { status: 400 });
       }
 
-      await processNewSubscriber(email, name, amountTotal, currency, event.type);
+      await processNewSubscriber(email, name, amountTotal, currency, event.type, session.subscription as string ?? "", session.customer as string ?? "");
     }
 
     // Renovación mensual de suscripción
@@ -169,7 +204,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: "No email" }, { status: 400 });
         }
 
-        await processNewSubscriber(email, name, amountTotal, currency, event.type);
+        await processNewSubscriber(email, name, amountTotal, currency, event.type, invoice.subscription as string ?? "", invoice.customer as string ?? "");
       }
     }
   } catch (err) {
