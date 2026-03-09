@@ -5,10 +5,13 @@ import Stripe from "stripe";
 import { Redis } from "@upstash/redis";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+
+function getRedis() {
+  return new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+}
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
@@ -132,6 +135,7 @@ async function saveSubscriber(
     joinedAt: new Date().toISOString(),
     status: "active",
   };
+  const redis = getRedis();
   await redis.set(`subscriber:${email}`, JSON.stringify(subscriber));
   await redis.sadd("subscribers", email);
   console.log(`💾 Saved subscriber: ${email}`);
