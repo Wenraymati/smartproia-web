@@ -3,9 +3,13 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import MercadoPagoConfig, { Preference } from "mercadopago";
 
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
-});
+function getClient(test = false) {
+  return new MercadoPagoConfig({
+    accessToken: test
+      ? process.env.MERCADOPAGO_TEST_ACCESS_TOKEN!
+      : process.env.MERCADOPAGO_ACCESS_TOKEN!,
+  });
+}
 
 const PLANS = {
   basico: { title: "SmartProIA Básico", price: 14990, label: "Básico" },
@@ -14,6 +18,7 @@ const PLANS = {
 
 export async function GET(req: NextRequest) {
   const plan = req.nextUrl.searchParams.get("plan") as keyof typeof PLANS | null;
+  const isTest = req.nextUrl.searchParams.get("test") === "true";
 
   if (!plan || !PLANS[plan]) {
     return NextResponse.json({ error: "Plan inválido" }, { status: 400 });
@@ -21,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   const { title, price, label } = PLANS[plan];
 
-  const preference = new Preference(client);
+  const preference = new Preference(getClient(isTest));
   const result = await preference.create({
     body: {
       items: [{ title, unit_price: price, quantity: 1, currency_id: "CLP" }],
