@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowRight, Bot, LineChart, Bell, Zap,
@@ -31,6 +31,13 @@ const testimonials = [
 export default function SmartProIA() {
   const [leadModal, setLeadModal] = useState(false);
   const openLead = () => setLeadModal(true);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/accuracy').then(r => r.json()).then(d => {
+      if (d?.successRate > 0) setAccuracy(d.successRate);
+    }).catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased selection:bg-cyan-500/20">
@@ -100,10 +107,10 @@ export default function SmartProIA() {
               {/* Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800">
                 {[
-                  { n: 10, s: '+', label: 'Variables' },
+                  { n: 10, s: '+', label: 'Variables IA' },
                   { n: 7, s: '/7', label: 'Días activo' },
                   { n: 3, s: '', label: 'Mercados' },
-                  { n: 200, s: '+', label: 'Suscriptores' },
+                  { n: 6, s: ':00 AM', label: 'Señal diaria' },
                 ].map((st, i) => (
                   <div key={i}>
                     <div className="text-3xl font-black text-white">
@@ -113,6 +120,17 @@ export default function SmartProIA() {
                   </div>
                 ))}
               </div>
+              {/* Accuracy badge — shown when real data available */}
+              {accuracy !== null && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3 mt-4 px-4 py-3 rounded-xl bg-green-950/30 border border-green-900/40 w-fit"
+                >
+                  <span className="text-green-400 font-black text-xl">{accuracy}%</span>
+                  <span className="text-green-300/70 text-xs">accuracy señales verificadas (últimos 30 días)</span>
+                </motion.div>
+              )}
             </motion.div>
 
             {/* Right — Live signal */}
