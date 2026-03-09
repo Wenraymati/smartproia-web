@@ -164,6 +164,12 @@ async function processNewSubscriber(
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
 
+  // Debug: log body snippet and live_mode to diagnose signature issues
+  try {
+    const parsed = JSON.parse(rawBody);
+    console.log(`[webhook] live_mode=${parsed.live_mode} type=${parsed.type} topic=${parsed.topic}`);
+  } catch { console.log(`[webhook] body not JSON, first 100: ${rawBody.slice(0, 100)}`); }
+
   if (!verifyMPSignature(req, rawBody)) {
     console.error("MP webhook signature invalid");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
