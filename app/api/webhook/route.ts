@@ -35,7 +35,7 @@ async function getMPPayment(paymentId: string) {
   const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
   });
-  if (!res.ok) throw new Error(`MP API error: ${res.status}`);
+  if (!res.ok) return null; // 404 = test/fake ID, other errors handled gracefully
   return res.json();
 }
 
@@ -43,7 +43,7 @@ async function getMPSubscription(preapprovalId: string) {
   const res = await fetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`, {
     headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
   });
-  if (!res.ok) throw new Error(`MP API error: ${res.status}`);
+  if (!res.ok) return null;
   return res.json();
 }
 
@@ -181,8 +181,8 @@ export async function POST(req: NextRequest) {
     if (type === "payment" && data?.id) {
       const payment = await getMPPayment(data.id);
 
-      if (payment.status !== "approved") {
-        return NextResponse.json({ received: true, skipped: payment.status });
+      if (!payment || payment.status !== "approved") {
+        return NextResponse.json({ received: true, skipped: payment?.status ?? "not_found" });
       }
 
       const email = payment.payer?.email;
@@ -200,8 +200,8 @@ export async function POST(req: NextRequest) {
     if (type === "subscription_preapproval" && data?.id) {
       const sub = await getMPSubscription(data.id);
 
-      if (sub.status !== "authorized") {
-        return NextResponse.json({ received: true, skipped: sub.status });
+      if (!sub || sub.status !== "authorized") {
+        return NextResponse.json({ received: true, skipped: sub?.status ?? "not_found" });
       }
 
       const email = sub.payer_email;
