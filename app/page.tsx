@@ -20,6 +20,7 @@ import { LeadModal } from './components/LeadModal';
 const MP_BASIC = '/api/checkout?plan=basico';
 const MP_PRO   = '/api/checkout?plan=pro';
 const WA_BOT       = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA';
+const WA_DCA       = 'https://wa.me/56962326907?text=Hola%2C%20me%20interesa%20el%20Bot%20DCA%20Autom%C3%A1tico%20de%20SmartProIA';
 const WA_FREE      = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias';
 
 const testimonials = [
@@ -231,6 +232,19 @@ export default function SmartProIA() {
             <p className="text-slate-400">Sin contratos. Cancela cuando quieras.</p>
           </div>
 
+          {/* DCA highlight banner */}
+          <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-green-950/40 to-cyan-950/40 border border-green-900/30 flex flex-col sm:flex-row items-center gap-4">
+            <div className="text-2xl">🤖</div>
+            <div className="flex-1">
+              <p className="text-white font-bold text-sm">Nuevo: Bot DCA Automático — compra en caídas, vende en ganancia</p>
+              <p className="text-slate-400 text-xs mt-0.5">Estrategia de acumulación inteligente · Alta tasa de acierto en mercados tendenciales</p>
+            </div>
+            <a href={WA_DCA} target="_blank" rel="noopener noreferrer"
+              className="shrink-0 px-4 py-2 rounded-xl bg-green-500/20 border border-green-500/40 text-green-400 text-sm font-semibold hover:bg-green-500/30 transition-colors">
+              Cotizar →
+            </a>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6">
             <PriceCard
               title="Canal Básico"
@@ -275,6 +289,80 @@ export default function SmartProIA() {
               cta="Cotizar"
               href={WA_BOT}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ── BOT DCA ── */}
+      <section className="py-24 px-6 bg-gradient-to-b from-green-950/10 to-transparent">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left — description */}
+            <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <Badge>Nuevo servicio</Badge>
+              <h2 className="text-4xl font-black text-white mt-4 mb-4">
+                Bot DCA Automático<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+                  Alta tasa de acierto.
+                </span>
+              </h2>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                Estrategia de acumulación inteligente: el bot compra automáticamente cuando BTC cae a niveles de soporte y vende cuando la posición entra en ganancia. Sin emociones, sin pantallas.
+              </p>
+              <div className="space-y-3 mb-8">
+                {[
+                  { icon: '📉', text: 'Detecta caídas de -3%, -6% y -10% desde el máximo diario' },
+                  { icon: '📊', text: 'Promedia el precio de entrada (3 niveles DCA progresivos)' },
+                  { icon: '✅', text: 'Vende automáticamente cuando la posición está en positivo' },
+                  { icon: '🛡️', text: 'Stop de emergencia configurado — capital siempre protegido' },
+                  { icon: '📲', text: 'Notificaciones en tiempo real a tu Telegram' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="text-lg leading-none mt-0.5">{item.icon}</span>
+                    <span className="text-slate-300 text-sm">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+              <Btn href={WA_DCA} variant="outline">
+                <MessageCircle className="w-4 h-4" /> Cotizar por WhatsApp
+              </Btn>
+            </motion.div>
+
+            {/* Right — pricing card */}
+            <motion.div initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <div className="bg-slate-900 border border-green-900/40 rounded-2xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-4xl font-black text-white">$400</div>
+                    <div className="text-slate-500 text-sm">USD · setup único</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-green-400 font-bold text-sm">Alta tasa de acierto</div>
+                    <div className="text-slate-600 text-xs">en mercados tendenciales</div>
+                  </div>
+                </div>
+                <div className="space-y-3 mb-6">
+                  {[
+                    'Instalación remota en tu PC o VPS (3-5 días)',
+                    'Conectado a tu cuenta Exness o Binance',
+                    'Configuración personalizada de niveles',
+                    'Bot Telegram con alertas en tiempo real',
+                    '1 mes de soporte incluido por WhatsApp',
+                    'Código propio — no depende de terceros',
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+                      <span className="text-slate-300 text-sm">{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <a href={WA_DCA} target="_blank" rel="noopener noreferrer"
+                  className="block w-full text-center py-3 px-6 rounded-xl bg-green-500 text-slate-900 font-bold hover:bg-green-400 transition-colors">
+                  Quiero este bot →
+                </a>
+                <p className="text-slate-600 text-xs text-center mt-3">Sin suscripción mensual · Pago único · Tuyo para siempre</p>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
