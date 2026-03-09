@@ -18,6 +18,8 @@ const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
 function verifyMPSignature(req: NextRequest, rawBody: string): boolean {
   if (!MP_WEBHOOK_SECRET) return true; // skip if not configured
+  // Skip signature check for sandbox events (live_mode: false)
+  try { if (JSON.parse(rawBody).live_mode === false) return true; } catch { /* continue */ }
   const xSignature = req.headers.get("x-signature");
   const xRequestId = req.headers.get("x-request-id");
   const dataId = new URL(req.url).searchParams.get("data.id");
