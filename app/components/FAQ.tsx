@@ -19,11 +19,19 @@ const faqs = [
   },
   {
     q: '¿Puedo cancelar cuando quiera?',
-    a: 'Sí. Sin contratos, sin permanencia mínima. Cancelas en cualquier momento.',
+    a: 'Sí. Sin contratos, sin permanencia mínima. Cancelas en cualquier momento desde el mismo Mercado Pago.',
+  },
+  {
+    q: '¿Qué garantía tienen las señales?',
+    a: 'No garantizamos rentabilidad — ningún sistema puede. Lo que sí garantizamos: señales entregadas a tiempo, datos reales y preferencia por NO-GO cuando hay duda, para proteger tu capital ante la incertidumbre.',
+  },
+  {
+    q: '¿En qué se diferencia de otros canales de señales?',
+    a: 'Transparencia total: mostramos accuracy real, sin capturas selectivas. El sistema es 100% autónomo (no depende de un "trader guru"), corre 24/7 y prioriza proteger capital sobre buscar operaciones a cualquier costo.',
   },
   {
     q: '¿Qué pasa si la señal es incorrecta?',
-    a: 'Ningún sistema es infalible. El bot está diseñado para preferir NO-GO ante la duda — proteger capital es la prioridad.',
+    a: 'Ningún sistema es infalible. El bot está diseñado para preferir NO-GO ante la duda — proteger capital es la prioridad número uno.',
   },
 ];
 
