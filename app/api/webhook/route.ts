@@ -14,31 +14,48 @@ function getRedis() {
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN!;
+const MP_TEST_ACCESS_TOKEN = process.env.MERCADOPAGO_TEST_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+const MP_TEST_WEBHOOK_SECRET = process.env.MERCADOPAGO_TEST_WEBHOOK_SECRET;
+
+function verifyWithSecret(secret: string, manifest: string, v1: string): boolean {
+  const hash = createHmac("sha256", secret).update(manifest).digest("hex");
+  return hash === v1;
+}
 
 function verifyMPSignature(req: NextRequest, rawBody: string): boolean {
-  if (!MP_WEBHOOK_SECRET) return true; // skip if not configured
-  // Skip signature check for sandbox events (live_mode: false)
-  try { if (JSON.parse(rawBody).live_mode === false) return true; } catch { /* continue */ }
   const xSignature = req.headers.get("x-signature");
+  if (!xSignature) return true; // MP may not sign all events
   const xRequestId = req.headers.get("x-request-id");
   const dataId = new URL(req.url).searchParams.get("data.id");
-  if (!xSignature) return true; // MP may not sign all events
   const parts = Object.fromEntries(xSignature.split(",").map(p => p.split("=")));
   const ts = parts["ts"];
   const v1 = parts["v1"];
   if (!ts || !v1) return true;
   const manifest = `id:${dataId ?? ""};request-id:${xRequestId ?? ""};ts:${ts};`;
-  const hash = createHmac("sha256", MP_WEBHOOK_SECRET).update(manifest).digest("hex");
-  return hash === v1;
+  // Try production secret
+  if (MP_WEBHOOK_SECRET && verifyWithSecret(MP_WEBHOOK_SECRET, manifest, v1)) return true;
+  // Try test secret (test app uses a different secret)
+  if (MP_TEST_WEBHOOK_SECRET && verifyWithSecret(MP_TEST_WEBHOOK_SECRET, manifest, v1)) return true;
+  // If no secrets configured, allow through
+  if (!MP_WEBHOOK_SECRET && !MP_TEST_WEBHOOK_SECRET) return true;
+  return false;
 }
 
 async function getMPPayment(paymentId: string) {
+  // Try production token first
   const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
   });
-  if (!res.ok) return null; // 404 = test/fake ID, other errors handled gracefully
-  return res.json();
+  if (res.ok) return res.json();
+  // Fallback to test token (sandbox payments are only visible with test credentials)
+  if (MP_TEST_ACCESS_TOKEN) {
+    const testRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${MP_TEST_ACCESS_TOKEN}` },
+    });
+    if (testRes.ok) return testRes.json();
+  }
+  return null;
 }
 
 async function getMPSubscription(preapprovalId: string) {
