@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac } from "crypto";
 import { Redis } from "@upstash/redis";
 
 function getRedis() {
@@ -13,6 +14,22 @@ function getRedis() {
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN!;
+const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+function verifyMPSignature(req: NextRequest, rawBody: string): boolean {
+  if (!MP_WEBHOOK_SECRET) return true; // skip if not configured
+  const xSignature = req.headers.get("x-signature");
+  const xRequestId = req.headers.get("x-request-id");
+  const dataId = new URL(req.url).searchParams.get("data.id");
+  if (!xSignature) return true; // MP may not sign all events
+  const parts = Object.fromEntries(xSignature.split(",").map(p => p.split("=")));
+  const ts = parts["ts"];
+  const v1 = parts["v1"];
+  if (!ts || !v1) return true;
+  const manifest = `id:${dataId ?? ""};request-id:${xRequestId ?? ""};ts:${ts};`;
+  const hash = createHmac("sha256", MP_WEBHOOK_SECRET).update(manifest).digest("hex");
+  return hash === v1;
+}
 
 async function getMPPayment(paymentId: string) {
   const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
@@ -143,10 +160,16 @@ async function processNewSubscriber(
 }
 
 export async function POST(req: NextRequest) {
-  let body: { type?: string; action?: string; data?: { id?: string } };
+  const rawBody = await req.text();
 
+  if (!verifyMPSignature(req, rawBody)) {
+    console.error("MP webhook signature invalid");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  let body: { type?: string; action?: string; data?: { id?: string } };
   try {
-    body = await req.json();
+    body = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
