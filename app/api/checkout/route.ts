@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const preference = new Preference(getClient(isTest));
   const result = await preference.create({
     body: {
-      items: [{ title, unit_price: price, quantity: 1, currency_id: "CLP" }],
+      items: [{ id: plan, title, unit_price: price, quantity: 1, currency_id: "CLP" }],
       back_urls: {
         success: `https://smartproia.com/success?plan=${encodeURIComponent(label)}`,
         failure: `https://smartproia.com/?error=payment`,
