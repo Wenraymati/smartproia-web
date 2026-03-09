@@ -141,6 +141,20 @@ async function saveSubscriber(
   console.log(`💾 Saved subscriber: ${email}`);
 }
 
+async function notifyAdmin(plan: string, email: string, amount: number, currency: string) {
+  try {
+    const adminChatId = "1641358693"; // Matias Telegram chat ID
+    const msg = `🎉 *Nuevo suscriptor SmartProIA*\n\n📧 ${email}\n📦 Plan: *${plan}*\n💰 ${amount} ${currency.toUpperCase()}\n⏰ ${new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })}`;
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: adminChatId, text: msg, parse_mode: "Markdown" }),
+    });
+  } catch (e) {
+    console.error("Admin notification failed:", e);
+  }
+}
+
 async function processNewSubscriber(
   email: string,
   name: string,
@@ -155,6 +169,7 @@ async function processNewSubscriber(
   const inviteLink = await createTelegramInviteLink();
   await sendWelcomeEmail(email, name, plan, inviteLink);
   await saveSubscriber(email, name, plan, subscriptionId, customerId, amountTotal, currency, inviteLink);
+  await notifyAdmin(plan, email, amountTotal, currency);
   console.log(`✅ Done: ${email} → ${plan} → ${inviteLink}`);
 }
 
