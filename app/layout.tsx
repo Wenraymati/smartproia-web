@@ -29,6 +29,49 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://smartproia.com/#organization",
+      name: "SmartProIA",
+      url: "https://smartproia.com",
+      email: "hola@smartproia.com",
+      description: "Bot autónomo de señales crypto con IA. Análisis diario de BTC, ETH y SOL a las 6AM.",
+      foundingDate: "2025",
+      areaServed: "CL",
+    },
+    {
+      "@type": "Product",
+      "@id": "https://smartproia.com/#product",
+      name: "SmartProIA — Canal Señales Crypto",
+      description: "Señales diarias de trading crypto con IA: GO · CAUTION · NO-GO. Análisis de BTC, ETH y SOL cada mañana a las 6AM vía Telegram.",
+      brand: { "@type": "Brand", name: "SmartProIA" },
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Canal Básico",
+          price: "15",
+          priceCurrency: "USD",
+          priceValidUntil: "2027-01-01",
+          availability: "https://schema.org/InStock",
+          url: "https://smartproia.com/#precios",
+        },
+        {
+          "@type": "Offer",
+          name: "Canal PRO",
+          price: "25",
+          priceCurrency: "USD",
+          priceValidUntil: "2027-01-01",
+          availability: "https://schema.org/InStock",
+          url: "https://smartproia.com/#precios",
+        },
+      ],
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +79,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={inter.className}>
         {children}
         <Analytics />
