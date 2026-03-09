@@ -17,8 +17,9 @@ import { MobileNav } from './components/MobileNav';
 import { StickyCTA } from './components/StickyCTA';
 import { LeadModal } from './components/LeadModal';
 
-const STRIPE_BASIC = 'https://buy.stripe.com/test_3cI4gzd6t1Gp1kD65V2go00';
-const STRIPE_PRO   = 'https://buy.stripe.com/test_bJe3cvfeB4SBe7pbqf2go01';
+// Reemplaza estas URLs con tus links de pago de Mercado Pago
+const MP_BASIC = process.env.NEXT_PUBLIC_MP_LINK_BASIC || 'https://mpago.la/BASICO';
+const MP_PRO   = process.env.NEXT_PUBLIC_MP_LINK_PRO   || 'https://mpago.la/PRO';
 const WA_BOT       = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA';
 const WA_FREE      = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias';
 
@@ -211,7 +212,7 @@ export default function SmartProIA() {
                 '7 días de prueba gratis',
               ]}
               cta="Suscribirme Básico"
-              href={STRIPE_BASIC}
+              href={MP_BASIC}
             />
             <PriceCard
               title="Canal PRO"
@@ -226,7 +227,7 @@ export default function SmartProIA() {
                 'Soporte directo Telegram',
               ]}
               cta="Suscribirme PRO"
-              href={STRIPE_PRO}
+              href={MP_PRO}
             />
             <PriceCard
               title="Bot Propio"

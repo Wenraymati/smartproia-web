@@ -1,10 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 import { Redis } from "@upstash/redis";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 function getRedis() {
   return new Redis({
@@ -15,10 +12,26 @@ function getRedis() {
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;
+const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN!;
+
+async function getMPPayment(paymentId: string) {
+  const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+    headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+  });
+  if (!res.ok) throw new Error(`MP API error: ${res.status}`);
+  return res.json();
+}
+
+async function getMPSubscription(preapprovalId: string) {
+  const res = await fetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`, {
+    headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+  });
+  if (!res.ok) throw new Error(`MP API error: ${res.status}`);
+  return res.json();
+}
 
 async function createTelegramInviteLink(): Promise<string> {
   const expireDate = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-
   const res = await fetch(
     `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/createChatInviteLink`,
     {
@@ -32,20 +45,12 @@ async function createTelegramInviteLink(): Promise<string> {
       }),
     }
   );
-
   const data = await res.json();
   if (!data.ok) throw new Error(`Telegram API error: ${data.description}`);
   return data.result.invite_link as string;
 }
 
-async function sendWelcomeEmail(
-  to: string,
-  name: string,
-  plan: string,
-  inviteLink: string
-) {
-  const RESEND_API_KEY = process.env.RESEND_API_KEY!;
-
+async function sendWelcomeEmail(to: string, name: string, plan: string, inviteLink: string) {
   const html = `
 <!DOCTYPE html>
 <html>
@@ -54,39 +59,31 @@ async function sendWelcomeEmail(
   <div style="text-align:center;margin-bottom:32px;">
     <span style="font-size:28px;font-weight:700;">SmartPro<span style="color:#06b6d4;">IA</span></span>
   </div>
-
-  <h1 style="font-size:24px;font-weight:700;margin-bottom:8px;">
-    ¡Bienvenido al canal ${plan}! 🎉
-  </h1>
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:8px;">¡Bienvenido al canal ${plan}! 🎉</h1>
   <p style="color:#a0a0a0;margin-bottom:32px;">
     Hola${name ? " " + name : ""}, tu pago fue confirmado. Ya puedes unirte al canal privado de Telegram.
   </p>
-
   <div style="background:#111;border:1px solid #1e2a3a;border-radius:12px;padding:24px;margin-bottom:32px;">
     <p style="font-size:14px;color:#a0a0a0;margin:0 0 12px 0;">Tu enlace de acceso (uso único, válido 7 días):</p>
     <a href="${inviteLink}"
        style="display:inline-block;background:#06b6d4;color:#000;font-weight:700;padding:14px 28px;border-radius:8px;text-decoration:none;font-size:16px;">
       Unirme al canal →
     </a>
-    <p style="font-size:12px;color:#555;margin:16px 0 0 0;">
-      Este enlace es de un solo uso. No lo compartas.
-    </p>
+    <p style="font-size:12px;color:#555;margin:16px 0 0 0;">Este enlace es de un solo uso. No lo compartas.</p>
   </div>
-
   <div style="border-top:1px solid #1e1e1e;padding-top:24px;font-size:12px;color:#555;">
     <p>Las señales llegan todos los días a las <strong style="color:#a0a0a0;">6:00 AM hora Chile</strong>.</p>
     <p>¿Preguntas? Escríbenos a <a href="mailto:hola@smartproia.com" style="color:#06b6d4;">hola@smartproia.com</a></p>
     <p style="margin-top:16px;">© 2026 SmartProIA · Las señales son análisis automatizados, no constituyen asesoría financiera.</p>
   </div>
 </body>
-</html>
-  `;
+</html>`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
       from: "SmartProIA <hola@smartproia.com>",
@@ -95,47 +92,24 @@ async function sendWelcomeEmail(
       html,
     }),
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Resend error: ${err}`);
-  }
+  if (!res.ok) throw new Error(`Resend error: ${await res.text()}`);
 }
 
-function detectPlan(amountTotal: number, currency: string): string {
-  // CLP es zero-decimal en Stripe (14223 = $14.223 CLP)
-  // USD es cents (1500 = $15.00 USD)
-  if (currency === "clp") {
-    return amountTotal <= 18000 ? "Básico" : "PRO";
-  }
-  // USD cents
-  if (amountTotal <= 1800) return "Básico";
-  return "PRO";
+function detectPlan(amount: number, currency: string): string {
+  if (currency === "CLP") return amount <= 18000 ? "Básico" : "PRO";
+  return amount <= 18 ? "Básico" : "PRO";
 }
 
 async function saveSubscriber(
-  email: string,
-  name: string,
-  plan: string,
-  subscriptionId: string,
-  customerId: string,
-  amountTotal: number,
-  currency: string,
-  inviteLink: string
+  email: string, name: string, plan: string,
+  subscriptionId: string, amount: number, currency: string, inviteLink: string
 ) {
-  const subscriber = {
-    email,
-    name,
-    plan,
-    subscriptionId,
-    customerId,
-    amount: amountTotal,
-    currency: currency.toUpperCase(),
-    inviteLink,
-    joinedAt: new Date().toISOString(),
-    status: "active",
-  };
   const redis = getRedis();
+  const subscriber = {
+    email, name, plan, subscriptionId,
+    amount, currency: currency.toUpperCase(),
+    inviteLink, joinedAt: new Date().toISOString(), status: "active",
+  };
   await redis.set(`subscriber:${email}`, JSON.stringify(subscriber));
   await redis.sadd("subscribers", email);
   console.log(`💾 Saved subscriber: ${email}`);
@@ -143,7 +117,7 @@ async function saveSubscriber(
 
 async function notifyAdmin(plan: string, email: string, amount: number, currency: string) {
   try {
-    const adminChatId = "1641358693"; // Matias Telegram chat ID
+    const adminChatId = "1641358693";
     const msg = `🎉 *Nuevo suscriptor SmartProIA*\n\n📧 ${email}\n📦 Plan: *${plan}*\n💰 ${amount} ${currency.toUpperCase()}\n⏰ ${new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })}`;
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
@@ -156,81 +130,67 @@ async function notifyAdmin(plan: string, email: string, amount: number, currency
 }
 
 async function processNewSubscriber(
-  email: string,
-  name: string,
-  amountTotal: number,
-  currency: string,
-  eventType: string,
-  subscriptionId: string,
-  customerId: string
+  email: string, name: string, amount: number,
+  currency: string, eventType: string, subscriptionId: string
 ) {
-  const plan = detectPlan(amountTotal, currency);
-  console.log(`[${eventType}] Processing ${email}, plan: ${plan}, amount: ${amountTotal} ${currency.toUpperCase()}`);
+  const plan = detectPlan(amount, currency);
+  console.log(`[${eventType}] Processing ${email}, plan: ${plan}, amount: ${amount} ${currency}`);
   const inviteLink = await createTelegramInviteLink();
   await sendWelcomeEmail(email, name, plan, inviteLink);
-  await saveSubscriber(email, name, plan, subscriptionId, customerId, amountTotal, currency, inviteLink);
-  await notifyAdmin(plan, email, amountTotal, currency);
+  await saveSubscriber(email, name, plan, subscriptionId, amount, currency, inviteLink);
+  await notifyAdmin(plan, email, amount, currency);
   console.log(`✅ Done: ${email} → ${plan} → ${inviteLink}`);
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
-
-  if (!sig) {
-    return NextResponse.json({ error: "No signature" }, { status: 400 });
-  }
-
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-  } catch (err) {
-    console.error("Webhook signature error:", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-  }
+  let body: { type?: string; action?: string; data?: { id?: string } };
 
   try {
-    // Nuevo checkout completado (pago inicial)
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const email = session.customer_details?.email;
-      const name = session.customer_details?.name ?? "";
-      const amountTotal = session.amount_total ?? 0;
-      const currency = session.currency ?? "usd";
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
 
-      if (!email) {
-        console.error("No customer email in session", session.id);
-        return NextResponse.json({ error: "No email" }, { status: 400 });
+  const { type, data } = body;
+
+  try {
+    // Pago único (Checkout Pro)
+    if (type === "payment" && data?.id) {
+      const payment = await getMPPayment(data.id);
+
+      if (payment.status !== "approved") {
+        return NextResponse.json({ received: true, skipped: payment.status });
       }
 
-      await processNewSubscriber(email, name, amountTotal, currency, event.type, session.subscription as string ?? "", session.customer as string ?? "");
+      const email = payment.payer?.email;
+      if (!email) return NextResponse.json({ error: "No email" }, { status: 400 });
+
+      const name = [payment.payer?.first_name, payment.payer?.last_name]
+        .filter(Boolean).join(" ");
+      const amount = payment.transaction_amount ?? 0;
+      const currency = payment.currency_id ?? "CLP";
+
+      await processNewSubscriber(email, name, amount, currency, type, String(data.id));
     }
 
-    // Renovación mensual de suscripción
-    if (event.type === "invoice.payment_succeeded") {
-      const invoice = event.data.object as Stripe.Invoice;
-      // Solo procesar renovaciones (no el primer pago, que ya maneja checkout.session.completed)
-      if (invoice.billing_reason === "subscription_cycle") {
-        const email = invoice.customer_email;
-        const name = (invoice.customer_name as string) ?? "";
-        const amountTotal = invoice.amount_paid ?? 0;
-        const currency = invoice.currency ?? "usd";
+    // Suscripción mensual (preapproval)
+    if (type === "subscription_preapproval" && data?.id) {
+      const sub = await getMPSubscription(data.id);
 
-        if (!email) {
-          console.error("No customer email in invoice", invoice.id);
-          return NextResponse.json({ error: "No email" }, { status: 400 });
-        }
-
-        await processNewSubscriber(email, name, amountTotal, currency, event.type, (invoice as any).subscription ?? "", invoice.customer as string ?? "");
+      if (sub.status !== "authorized") {
+        return NextResponse.json({ received: true, skipped: sub.status });
       }
+
+      const email = sub.payer_email;
+      if (!email) return NextResponse.json({ error: "No email" }, { status: 400 });
+
+      const amount = sub.auto_recurring?.transaction_amount ?? 0;
+      const currency = sub.auto_recurring?.currency_id ?? "CLP";
+
+      await processNewSubscriber(email, "", amount, currency, type, String(data.id));
     }
   } catch (err) {
     console.error("Error processing webhook:", err);
-    // Retornamos 500 para que Stripe reintente
     return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 
