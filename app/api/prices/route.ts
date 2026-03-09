@@ -38,7 +38,7 @@ export async function GET() {
       },
       fearGreed: {
         value: fearGreed.value,
-        label: fearGreed.classification,
+        label: (fearGreed as Record<string, string>).value_classification ?? "",
       },
     });
   } catch (e) {
