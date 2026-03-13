@@ -59,11 +59,13 @@ export default async function Dashboard(props: {
 
   const { total, subscribers, byPlan, recent, leads } = data;
 
+  const mrr = ((byPlan["Básico"] || 0) * 15) + ((byPlan["PRO"] || 0) * 25);
+
   const stats = [
+    { label: "MRR (USD)", value: `$${mrr}`, color: "text-green-400" },
     { label: "Total suscriptores", value: total, color: "text-cyan-400" },
-    { label: "Plan Básico", value: byPlan["Básico"] || 0, color: "text-slate-300" },
-    { label: "Plan PRO", value: byPlan["PRO"] || 0, color: "text-cyan-400" },
-    { label: "Últimos 7 días", value: recent, color: "text-green-400" },
+    { label: "Plan Básico ($15)", value: byPlan["Básico"] || 0, color: "text-slate-300" },
+    { label: "Plan PRO ($25)", value: byPlan["PRO"] || 0, color: "text-cyan-400" },
     { label: "Leads capturados", value: leads, color: "text-purple-400" },
   ];
 
@@ -95,7 +97,7 @@ export default async function Dashboard(props: {
           </div>
           {total === 0 ? (
             <div className="px-6 py-16 text-center text-slate-600">
-              Sin suscriptores aún. El webhook de Stripe guardará aquí cuando haya pagos.
+              Sin suscriptores aún. El webhook de Mercado Pago guardará aquí cuando haya pagos.
             </div>
           ) : (
             <div className="overflow-x-auto">
