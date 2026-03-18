@@ -18,9 +18,9 @@ const MP_TEST_ACCESS_TOKEN = process.env.MERCADOPAGO_TEST_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 const MP_TEST_WEBHOOK_SECRET = process.env.MERCADOPAGO_TEST_WEBHOOK_SECRET;
 
-function checkSignature(req: NextRequest): void {
+function checkSignature(req: NextRequest): boolean {
   const xSignature = req.headers.get("x-signature");
-  if (!xSignature || (!MP_WEBHOOK_SECRET && !MP_TEST_WEBHOOK_SECRET)) return;
+  if (!xSignature || (!MP_WEBHOOK_SECRET && !MP_TEST_WEBHOOK_SECRET)) return true;
   const xRequestId = req.headers.get("x-request-id");
   const dataId = new URL(req.url).searchParams.get("data.id");
   const parts = Object.fromEntries(xSignature.split(",").map(p => {
@@ -29,7 +29,7 @@ function checkSignature(req: NextRequest): void {
   }));
   const ts = parts["ts"];
   const v1 = parts["v1"];
-  if (!ts || !v1) return;
+  if (!ts || !v1) return false;
   const manifest = `id:${dataId ?? ""};request-id:${xRequestId ?? ""};ts:${ts};`;
   const prodOk = MP_WEBHOOK_SECRET
     ? createHmac("sha256", MP_WEBHOOK_SECRET).update(manifest).digest("hex") === v1
@@ -38,8 +38,10 @@ function checkSignature(req: NextRequest): void {
     ? createHmac("sha256", MP_TEST_WEBHOOK_SECRET).update(manifest).digest("hex") === v1
     : false;
   if (!prodOk && !testOk) {
-    console.warn("[webhook] signature mismatch — proceeding (payment API is the real guard)");
+    console.warn("[webhook] signature mismatch — rejecting");
+    return false;
   }
+  return true;
 }
 
 async function getMPPayment(paymentId: string) {
@@ -163,6 +165,96 @@ async function notifyAdmin(plan: string, email: string, amount: number, currency
   }
 }
 
+interface CartaJob {
+  email: string;
+  resultado: string;
+  ocr: string;
+  timestamp: string;
+}
+
+async function sendCartaSiiEmail(to: string, resultado: string) {
+  const resultadoHtml = resultado
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n\n/g, "</p><p style=\"margin:0 0 16px 0;\">")
+    .replace(/\n/g, "<br>");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="background:#0a0a0a;color:#ffffff;font-family:Inter,sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <span style="font-size:28px;font-weight:700;">SmartPro<span style="color:#06b6d4;">IA</span></span>
+  </div>
+  <h1 style="font-size:22px;font-weight:700;margin-bottom:8px;">Tu Carta del SII Decodificada</h1>
+  <p style="color:#a0a0a0;margin-bottom:32px;">
+    Aquí está el análisis completo de tu documento tributario.
+  </p>
+  <div style="background:#111;border:1px solid #1e2a3a;border-radius:12px;padding:24px;margin-bottom:32px;">
+    <p style="margin:0 0 16px 0;">${resultadoHtml}</p>
+  </div>
+  <div style="background:#0f1f2e;border:1px solid #1e3a4a;border-radius:8px;padding:16px;margin-bottom:32px;">
+    <p style="font-size:13px;color:#a0a0a0;margin:0;">
+      <strong style="color:#06b6d4;">Tip:</strong> Guarda este email para futuras referencias.
+      Si tienes otra carta del SII, puedes analizarla en
+      <a href="https://smartproia.com/carta-sii" style="color:#06b6d4;">smartproia.com/carta-sii</a>
+    </p>
+  </div>
+  <div style="border-top:1px solid #1e1e1e;padding-top:24px;font-size:12px;color:#555;">
+    <p>¿Preguntas? Escríbenos a <a href="mailto:hola@smartproia.com" style="color:#06b6d4;">hola@smartproia.com</a></p>
+    <p style="margin-top:16px;">© 2026 SmartProIA · Este análisis es orientativo, no constituye asesoría legal ni tributaria.</p>
+  </div>
+</body>
+</html>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from: "SmartProIA <hola@smartproia.com>",
+      to: [to],
+      subject: "Tu análisis de carta SII está listo — SmartProIA",
+      html,
+    }),
+  });
+  if (!res.ok) throw new Error(`Resend error (carta-sii): ${await res.text()}`);
+}
+
+async function processCartaSiiPayment(paymentId: string, externalRef: string) {
+  const redis = getRedis();
+
+  // Deduplication
+  const dedupKey = `processed:carta:${paymentId}`;
+  const already = await redis.get(dedupKey);
+  if (already) {
+    console.log(`[carta-sii] Already processed payment ${paymentId}, skipping`);
+    return;
+  }
+  await redis.set(dedupKey, "1", { ex: 60 * 60 * 24 * 30 });
+
+  // Extract jobId from external_reference (format: "carta:{jobId}")
+  const jobId = externalRef.slice("carta:".length);
+  const jobRaw = await redis.get(`carta:${jobId}`);
+
+  if (!jobRaw) {
+    console.error(`[carta-sii] Job not found in Redis: carta:${jobId}`);
+    return;
+  }
+
+  const job = (typeof jobRaw === "string" ? JSON.parse(jobRaw) : jobRaw) as CartaJob;
+
+  // Send email with full resultado
+  await sendCartaSiiEmail(job.email, job.resultado);
+
+  // Mark as paid (24h TTL — result page validity)
+  await redis.set(`carta:${jobId}:paid`, "true", { ex: 86400 });
+
+  console.log(`[carta-sii] Delivered result for job ${jobId} to ${job.email}`);
+}
+
 async function processNewSubscriber(
   email: string, name: string, amount: number,
   currency: string, eventType: string, subscriptionId: string
@@ -190,7 +282,9 @@ async function processNewSubscriber(
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
 
-  checkSignature(req);
+  if (!checkSignature(req)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+  }
 
   let body: { type?: string; action?: string; data?: { id?: string } };
   try {
@@ -208,6 +302,14 @@ export async function POST(req: NextRequest) {
 
       if (!payment || payment.status !== "approved") {
         return NextResponse.json({ received: true, skipped: payment?.status ?? "not_found" });
+      }
+
+      const externalRef: string = payment.external_reference ?? "";
+
+      // Carta SII one-time payment
+      if (externalRef.startsWith("carta:")) {
+        await processCartaSiiPayment(String(data.id), externalRef);
+        return NextResponse.json({ received: true });
       }
 
       const email = payment.payer?.email;

@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, MessageCircle } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'Producto', href: '#producto' },
+  { label: 'Cómo funciona', href: '#como-funciona' },
+  { label: 'Casos de uso', href: '#casos' },
   { label: 'Precios', href: '#precios' },
-  { label: 'Servicios', href: '#servicios' },
   { label: 'FAQ', href: '#faq' },
 ];
 
@@ -82,9 +82,9 @@ export function MobileNav({ onCtaClick }: MobileNavProps) {
               <div className="p-4 border-t border-slate-800">
                 <button
                   onClick={() => { setOpen(false); onCtaClick(); }}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl px-6 py-3 transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-6 py-3 transition-all"
                 >
-                  7 días gratis <ArrowRight className="w-4 h-4" />
+                  <MessageCircle className="w-4 h-4" /> Quiero una demo
                 </button>
               </div>
             </motion.div>

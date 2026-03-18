@@ -28,7 +28,7 @@ export function LeadModal({ open, onClose, redirectUrl }: LeadModalProps) {
       await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'lead-modal' }),
+        body: JSON.stringify({ email, source: 'demo-modal' }),
       });
       setDone(true);
       setTimeout(goToWA, 800);
@@ -79,12 +79,12 @@ export function LeadModal({ open, onClose, redirectUrl }: LeadModalProps) {
               ) : (
                 <>
                   <div className="mb-6">
-                    <div className="text-xs font-semibold text-cyan-400 mb-2">7 días gratis</div>
+                    <div className="text-xs font-semibold text-green-400 mb-2">Demo gratis · Sin compromiso</div>
                     <h2 className="text-xl font-black text-white mb-2">
-                      ¿A qué email te enviamos acceso?
+                      ¿A qué email te mandamos info?
                     </h2>
                     <p className="text-slate-400 text-sm">
-                      Ingresa tu email para recibir novedades y acceso prioritario. Luego te redirigimos a WhatsApp.
+                      Dejanos tu email y te contactamos por WhatsApp para coordinar la demo.
                     </p>
                   </div>
 
@@ -94,13 +94,13 @@ export function LeadModal({ open, onClose, redirectUrl }: LeadModalProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="tu@email.com"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-colors text-sm"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500 transition-colors text-sm"
                       autoFocus
                     />
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-60 text-slate-950 font-bold rounded-xl py-3 transition-all"
+                      className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 disabled:opacity-60 text-slate-950 font-bold rounded-xl py-3 transition-all"
                     >
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -114,7 +114,7 @@ export function LeadModal({ open, onClose, redirectUrl }: LeadModalProps) {
                     onClick={handleSkip}
                     className="w-full text-center text-slate-600 hover:text-slate-400 text-xs mt-3 transition-colors"
                   >
-                    Saltar e ir a WhatsApp →
+                    Ir directo a WhatsApp →
                   </button>
                 </>
               )}

@@ -6,32 +6,32 @@ import { ChevronDown } from 'lucide-react';
 
 const faqs = [
   {
-    q: '¿Necesito saber de trading para usar esto?',
-    a: 'No. La señal es clara: GO (entra), CAUTION (precaución) o NO-GO (no entres). Con eso basta.',
+    q: '¿Necesito tener cuenta de WhatsApp Business?',
+    a: 'No es obligatorio tener una cuenta Business previa. Nosotros gestionamos todo el proceso de activación del número con la API oficial de WhatsApp. Podés usar tu número actual o uno nuevo.',
   },
   {
-    q: '¿El bot tiene acceso a mi cuenta?',
-    a: 'Nunca. Solo analiza el mercado y envía señales. Tú decides si operas o no.',
+    q: '¿Cuánto tarda el setup?',
+    a: 'El proceso completo toma entre 5 y 7 días hábiles desde que confirmás el proyecto. Incluye: relevamiento de tu negocio, configuración del bot, pruebas y lanzamiento.',
   },
   {
-    q: '¿Cuándo llegan las señales?',
-    a: 'Todos los días a las 6:00 AM hora Chile, directo al canal Telegram privado.',
+    q: '¿Qué pasa si quiero hacer cambios al bot después?',
+    a: 'El mantenimiento mensual incluye hasta 2 ajustes al mes (respuestas, flujos, preguntas frecuentes). Cambios mayores se cotizan por separado.',
   },
   {
-    q: '¿Puedo cancelar cuando quiera?',
-    a: 'Sí. Sin contratos, sin permanencia mínima. Cancelas en cualquier momento desde el mismo Mercado Pago.',
+    q: '¿Puedo cancelar el plan mensual?',
+    a: 'Sí. Sin contratos de permanencia mínima. Si cancelás, el bot deja de funcionar al término del período pagado. No hay penalizaciones.',
   },
   {
-    q: '¿Qué garantía tienen las señales?',
-    a: 'No garantizamos rentabilidad — ningún sistema puede. Lo que sí garantizamos: señales entregadas a tiempo, datos reales y preferencia por NO-GO cuando hay duda, para proteger tu capital ante la incertidumbre.',
+    q: '¿El bot puede cerrar ventas o solo responder preguntas?',
+    a: 'Depende del flujo que diseñemos juntos. El bot puede calificar leads, enviar precios, agendar citas, y derivar al equipo humano en el momento justo. El objetivo es convertir, no solo informar.',
   },
   {
-    q: '¿En qué se diferencia de otros canales de señales?',
-    a: 'Transparencia total: mostramos accuracy real, sin capturas selectivas. El sistema es 100% autónomo (no depende de un "trader guru"), corre 24/7 y prioriza proteger capital sobre buscar operaciones a cualquier costo.',
+    q: '¿Qué es Chatwoot y para qué sirve?',
+    a: 'Chatwoot es el dashboard que recibe tu equipo. Desde ahí ven todas las conversaciones, pueden tomar el control de un chat cuando el bot no puede resolverlo, y tienen el historial completo de cada cliente.',
   },
   {
-    q: '¿Qué pasa si la señal es incorrecta?',
-    a: 'Ningún sistema es infalible. El bot está diseñado para preferir NO-GO ante la duda — proteger capital es la prioridad número uno.',
+    q: '¿Funciona para cualquier tipo de negocio?',
+    a: 'Funciona mejor en negocios con flujos repetitivos: gimnasios, clínicas, inmobiliarias, restaurantes, talleres, servicios. Si tenés dudas de si aplica a tu caso, escribinos por WhatsApp y lo evaluamos gratis.',
   },
 ];
 

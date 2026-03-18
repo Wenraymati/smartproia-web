@@ -7,14 +7,14 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SmartProIA — Señales Crypto con IA | Canal Telegram 6AM",
+  title: "SmartProIA — Bots de WhatsApp IA para tu negocio",
   description:
-    "Bot autónomo que analiza BTC, ETH y SOL cada mañana a las 6AM y te envía una señal clara: GO · CAUTION · NO-GO. 7 días gratis. Sin acceso a tu cuenta.",
-  keywords: ["señales crypto", "bot trading", "bitcoin señales", "inteligencia artificial trading", "canal telegram crypto", "SmartProIA"],
+    "Automatizá la atención al cliente de tu negocio con WhatsApp e inteligencia artificial. Setup en 7 días. Ideal para gimnasios, clínicas, inmobiliarias y más.",
+  keywords: ["bot whatsapp", "automatización whatsapp", "bot IA negocios", "whatsapp business bot", "atención al cliente IA", "SmartProIA", "gimnasio bot", "Chile automatización"],
   authors: [{ name: "SmartProIA" }],
   openGraph: {
-    title: "SmartProIA — Señales Crypto con IA cada mañana",
-    description: "Bot autónomo analiza BTC, ETH y SOL a las 6AM. Señal clara GO/CAUTION/NO-GO. 7 días gratis.",
+    title: "SmartProIA — Bots de WhatsApp IA para tu negocio",
+    description: "Bots con IA que atienden, califican y cierran leads 24/7 por WhatsApp. Setup en 7 días.",
     url: "https://smartproia.com",
     siteName: "SmartProIA",
     locale: "es_CL",
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SmartProIA — Señales Crypto con IA",
-    description: "Bot autónomo analiza BTC, ETH y SOL a las 6AM. Señal clara GO/CAUTION/NO-GO. 7 días gratis.",
+    title: "SmartProIA — Bots de WhatsApp IA para tu negocio",
+    description: "Bots con IA que atienden, califican y cierran leads 24/7 por WhatsApp. Setup en 7 días.",
   },
   metadataBase: new URL("https://smartproia.com"),
   robots: { index: true, follow: true },
@@ -38,21 +38,21 @@ const jsonLd = {
       name: "SmartProIA",
       url: "https://smartproia.com",
       email: "hola@smartproia.com",
-      description: "Bot autónomo de señales crypto con IA. Análisis diario de BTC, ETH y SOL a las 6AM.",
+      description: "Bots de WhatsApp con IA para negocios en Chile y LatAm. Atención automatizada 24/7.",
       foundingDate: "2025",
-      areaServed: "CL",
+      areaServed: ["CL", "AR", "MX", "CO", "PE"],
     },
     {
       "@type": "Product",
       "@id": "https://smartproia.com/#product",
-      name: "SmartProIA — Canal Señales Crypto",
-      description: "Señales diarias de trading crypto con IA: GO · CAUTION · NO-GO. Análisis de BTC, ETH y SOL cada mañana a las 6AM vía Telegram.",
+      name: "SmartProIA — Bot de WhatsApp IA",
+      description: "Bot de WhatsApp con inteligencia artificial para negocios. Atiende clientes, califica leads y cierra ventas 24/7.",
       brand: { "@type": "Brand", name: "SmartProIA" },
       offers: [
         {
           "@type": "Offer",
-          name: "Canal Básico",
-          price: "15",
+          name: "Plan Starter",
+          price: "80",
           priceCurrency: "USD",
           priceValidUntil: "2027-01-01",
           availability: "https://schema.org/InStock",
@@ -60,8 +60,8 @@ const jsonLd = {
         },
         {
           "@type": "Offer",
-          name: "Canal PRO",
-          price: "25",
+          name: "Plan Pro",
+          price: "150",
           priceCurrency: "USD",
           priceValidUntil: "2027-01-01",
           availability: "https://schema.org/InStock",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 interface StickyCTAProps {
   onOpen: () => void;
@@ -30,9 +30,9 @@ export function StickyCTA({ onOpen }: StickyCTAProps) {
           <div className="bg-[#030712]/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3">
             <button
               onClick={onOpen}
-              className="w-full inline-flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl py-3.5 transition-all shadow-lg shadow-cyan-500/30"
+              className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl py-3.5 transition-all shadow-lg shadow-green-500/30"
             >
-              Probar 7 días gratis <ArrowRight className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4" /> Quiero mi bot gratis
             </button>
           </div>
         </motion.div>

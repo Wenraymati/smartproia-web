@@ -1,121 +1,186 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight, Bot, LineChart, Bell, Zap,
-  CheckCircle2, MessageCircle, Star, Shield, TrendingUp, Users, Smartphone,
+  ArrowRight, Bot, CheckCircle2, MessageCircle, Star, Shield,
+  Users, Smartphone, Zap, Clock, BarChart3, Headphones,
 } from 'lucide-react';
 
-import { Counter } from './components/Counter';
 import { Badge } from './components/Badge';
 import { Btn } from './components/Btn';
-import { LiveSignal } from './components/LiveSignal';
 import { PriceCard } from './components/PriceCard';
 import { FAQ } from './components/FAQ';
 import { MobileNav } from './components/MobileNav';
 import { StickyCTA } from './components/StickyCTA';
 import { LeadModal } from './components/LeadModal';
 
-const MP_BASIC = '/api/checkout?plan=basico';
-const MP_PRO   = '/api/checkout?plan=pro';
-const WA_BOT       = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20cotizar%20un%20bot%20propio%20SmartProIA';
-const WA_DCA       = 'https://wa.me/56962326907?text=Hola%2C%20me%20interesa%20el%20Bot%20DCA%20Autom%C3%A1tico%20de%20SmartProIA';
-const WA_FREE      = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20probar%20SmartProIA%20gratis%207%20dias';
+/* ─── Constants ─────────────────────────────────────────────── */
+const WA_DEMO = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20una%20demo%20del%20bot%20de%20WhatsApp%20para%20mi%20negocio';
+const WA_CONTACT = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20bots%20de%20WhatsApp';
 
+/* ─── Testimonials ───────────────────────────────────────────── */
 const testimonials = [
-  { name: 'Carlos M.', role: 'Trader independiente', text: 'Antes perdía tiempo mirando el mercado cada mañana. Ahora leo la señal a las 6 AM y ya sé qué hacer.', stars: 5 },
-  { name: 'Valentina R.', role: 'Inversora particular', text: 'Lo que más me gusta es que cuando dice NO-GO, realmente no entro. Mi capital está más protegido.', stars: 5 },
-  { name: 'Rodrigo A.', role: 'Crypto enthusiast', text: 'Contraté el bot propio. En 3 días estaba funcionando en mi VPS. El soporte fue excelente.', stars: 5 },
+  {
+    name: 'Marcelo F.',
+    role: 'Dueño de gimnasio, Santiago',
+    text: 'Antes perdíamos leads porque nadie respondía los mensajes de noche. Ahora el bot agenda clases solo y nosotros llegamos a trabajar con las citas ya confirmadas.',
+    stars: 5,
+  },
+  {
+    name: 'Carolina V.',
+    role: 'Clínica estética, Providencia',
+    text: 'El bot responde preguntas de precios, disponibilidad y hasta envía la dirección con el mapa. El equipo solo toma el control cuando el cliente ya está listo para pagar.',
+    stars: 5,
+  },
+  {
+    name: 'Rodrigo S.',
+    role: 'Inmobiliaria, Viña del Mar',
+    text: 'Lo que más me sorprendió es que el bot califica a los leads antes de pasarlos. Solo recibimos consultas de gente que ya tiene intención real de comprar.',
+    stars: 5,
+  },
 ];
 
+/* ─── Use cases ──────────────────────────────────────────────── */
+const useCases = [
+  {
+    icon: '🏋️',
+    title: 'Gimnasios',
+    desc: 'Agenda clases, informa horarios y planes, cobra membresías y envía recordatorios automáticos de pago.',
+    example: 'GymBot — en producción',
+  },
+  {
+    icon: '🏥',
+    title: 'Clínicas y salud',
+    desc: 'Reserva de horas, recordatorios de cita, respuestas a preguntas frecuentes sobre tratamientos y precios.',
+    example: 'Clínicas estéticas, dentistas',
+  },
+  {
+    icon: '🏠',
+    title: 'Inmobiliarias',
+    desc: 'Califica leads, envía fichas de propiedades, agenda visitas y deriva a ejecutivos solo cuando hay interés real.',
+    example: 'Captación de compradores 24/7',
+  },
+  {
+    icon: '🔧',
+    title: 'Servicios y talleres',
+    desc: 'Presupuestos automáticos, estados de reparaciones, recordatorios de revisión y agenda de visitas técnicas.',
+    example: 'RuizRuiz Bot — en producción',
+  },
+];
+
+/* ─── Features ───────────────────────────────────────────────── */
+const features = [
+  {
+    icon: Bot, color: 'text-cyan-400', bg: 'bg-cyan-500/8',
+    title: 'IA que entiende a tus clientes',
+    desc: 'El bot interpreta lenguaje natural. Si el cliente escribe "quiero info del plan familiar", entiende lo que necesita y responde en contexto.',
+  },
+  {
+    icon: Headphones, color: 'text-purple-400', bg: 'bg-purple-500/8',
+    title: 'Dashboard para tu equipo',
+    desc: 'Tu equipo ve todas las conversaciones en Chatwoot. Pueden tomar control de cualquier chat en segundos cuando el bot necesita ayuda humana.',
+  },
+  {
+    icon: Smartphone, color: 'text-green-400', bg: 'bg-green-500/8',
+    title: 'WhatsApp Business oficial',
+    desc: 'Usamos la API oficial de WhatsApp Business. Sin riesgo de baneo, con verificación y soporte de Meta.',
+  },
+  {
+    icon: BarChart3, color: 'text-yellow-400', bg: 'bg-yellow-500/8',
+    title: 'Reportes semanales',
+    desc: 'Cada semana recibís un resumen: conversaciones atendidas, leads calificados, temas más consultados y oportunidades de mejora.',
+  },
+  {
+    icon: Clock, color: 'text-blue-400', bg: 'bg-blue-500/8',
+    title: 'Setup en 7 días',
+    desc: 'De la consulta inicial al bot en producción en una semana. Nos encargamos de todo: configuración, flujos, pruebas y lanzamiento.',
+  },
+  {
+    icon: Shield, color: 'text-red-400', bg: 'bg-red-500/8',
+    title: 'Mantenimiento incluido',
+    desc: 'El plan mensual incluye ajustes, mejoras al bot y soporte técnico. No te quedás solo después del setup.',
+  },
+];
+
+/* ─── Component ──────────────────────────────────────────────── */
 export default function SmartProIA() {
   const [leadModal, setLeadModal] = useState(false);
   const openLead = () => setLeadModal(true);
-  const [accuracy, setAccuracy] = useState<number | null>(null);
-  const [fbOptions, setFbOptions] = useState<string[]>([]);
-  const [fbSent, setFbSent] = useState(false);
-  const toggleFb = (opt: string) =>
-    setFbOptions(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]);
-  const submitFeedback = async () => {
-    if (!fbOptions.length) return;
-    try {
-      await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interests: fbOptions }),
-      });
-    } catch { /* silent */ }
-    setFbSent(true);
-  };
-
-  useEffect(() => {
-    fetch('/api/accuracy').then(r => r.json()).then(d => {
-      if (d?.successRate > 0) setAccuracy(d.successRate);
-    }).catch(() => {});
-  }, []);
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased selection:bg-cyan-500/20">
-      <LeadModal open={leadModal} onClose={() => setLeadModal(false)} redirectUrl={WA_FREE} />
+    <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased selection:bg-green-500/20">
+      <LeadModal open={leadModal} onClose={() => setLeadModal(false)} redirectUrl={WA_DEMO} />
       <StickyCTA onOpen={openLead} />
 
       {/* ── NAVBAR ── */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-[#030712]/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-xl font-black tracking-tight text-white">
-            SmartPro<span className="text-cyan-400">IA</span>
+            SmartPro<span className="text-green-400">IA</span>
           </div>
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm text-slate-400">
-            <a href="#producto" className="hover:text-white transition-colors">Producto</a>
+            <a href="#como-funciona" className="hover:text-white transition-colors">Cómo funciona</a>
+            <a href="#casos" className="hover:text-white transition-colors">Casos de uso</a>
             <a href="#precios" className="hover:text-white transition-colors">Precios</a>
-            <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
           {/* Desktop CTA */}
           <div className="hidden md:block">
-            <Btn onClick={openLead} className="text-sm px-4 py-2">
-              Probar gratis <ArrowRight className="w-3.5 h-3.5" />
-            </Btn>
+            <a
+              href={WA_DEMO}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-4 py-2 text-sm transition-all"
+            >
+              <MessageCircle className="w-3.5 h-3.5" /> Agendar demo
+            </a>
           </div>
           {/* Mobile hamburger */}
-          <MobileNav onCtaClick={openLead} waFree={WA_FREE} />
+          <MobileNav onCtaClick={openLead} waFree={WA_DEMO} />
         </div>
       </header>
 
       {/* ── HERO ── */}
       <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-cyan-500/8 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-purple-500/6 rounded-full blur-[120px] pointer-events-none" />
+        {/* Background glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-green-500/6 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left */}
+            {/* Left — copy */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
               <div className="mb-6">
                 <Badge>
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  Bot activo · Operando desde Chile 🇨🇱
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  Bots activos · Operando desde Chile 🇨🇱
                 </Badge>
               </div>
               <h1 className="text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
-                Señales Crypto<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-                  con IA real.
-                </span><br />
-                Cada mañana.
+                Tu negocio en<br />
+                WhatsApp,<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+                  en piloto automático.
+                </span>
               </h1>
               <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-lg">
-                A las <strong className="text-white">6:00 AM</strong> un bot autónomo analiza BTC, ETH y SOL con 10+ variables y te envía una señal directa al canal Telegram:{' '}
-                <strong className="text-cyan-400">GO · CAUTION · NO-GO.</strong>
+                Bots con IA que{' '}
+                <strong className="text-white">atienden, califican y cierran leads</strong>{' '}
+                24/7 por WhatsApp. Sin contratar más personal. Sin perder consultas.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-12">
-                <Btn onClick={openLead} className="text-base px-7 py-3.5">
-                  7 días gratis <ArrowRight className="w-4 h-4" />
-                </Btn>
-                <Btn href="#producto" variant="outline" className="text-base px-7 py-3.5">
+                <a
+                  href={WA_DEMO}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-7 py-3.5 text-base transition-all shadow-lg shadow-green-500/20"
+                >
+                  <MessageCircle className="w-4 h-4" /> Quiero mi bot
+                </a>
+                <Btn href="#como-funciona" variant="outline" className="text-base px-7 py-3.5">
                   Ver cómo funciona
                 </Btn>
               </div>
@@ -123,46 +188,87 @@ export default function SmartProIA() {
               {/* Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800">
                 {[
-                  { n: 10, s: '+', label: 'Variables IA' },
-                  { n: 7, s: '/7', label: 'Días activo' },
-                  { n: 3, s: '', label: 'Mercados' },
-                  { n: 6, s: ':00 AM', label: 'Señal diaria' },
+                  { n: '24/7', label: 'Sin descanso' },
+                  { n: '7d', label: 'Setup listo' },
+                  { n: '2+', label: 'Bots activos' },
+                  { n: '0', label: 'Leads perdidos' },
                 ].map((st, i) => (
                   <div key={i}>
-                    <div className="text-3xl font-black text-white">
-                      <Counter to={st.n} suffix={st.s} />
-                    </div>
+                    <div className="text-3xl font-black text-white">{st.n}</div>
                     <div className="text-xs text-slate-600 uppercase tracking-widest mt-1">{st.label}</div>
                   </div>
                 ))}
               </div>
-              {/* Accuracy badge — shown when real data available */}
-              {accuracy !== null && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 mt-4 px-4 py-3 rounded-xl bg-green-950/30 border border-green-900/40 w-fit"
-                >
-                  <span className="text-green-400 font-black text-xl">{accuracy}%</span>
-                  <span className="text-green-300/70 text-xs">accuracy señales verificadas (últimos 30 días)</span>
-                </motion.div>
-              )}
             </motion.div>
 
-            {/* Right — Live signal */}
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
-              <LiveSignal />
+            {/* Right — WhatsApp mock */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex justify-center"
+            >
+              <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                {/* WA header */}
+                <div className="bg-[#075E54] px-4 py-3 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-green-400/20 flex items-center justify-center">
+                    <Bot className="w-5 h-5 text-green-300" />
+                  </div>
+                  <div>
+                    <div className="text-white font-semibold text-sm">GymBot IA</div>
+                    <div className="text-green-300/70 text-xs">en línea</div>
+                  </div>
+                </div>
+                {/* Chat messages */}
+                <div className="bg-[#0a1628] p-4 space-y-3 min-h-[280px]">
+                  {[
+                    { from: 'user', text: 'Hola, ¿tienen planes para dos personas?' },
+                    { from: 'bot', text: '¡Hola! Sí, tenemos el Plan Pareja por $35.000/mes. Incluye acceso ilimitado para ambos, todas las clases y 1 sesión personal al mes. ¿Te interesa agendar una visita para conocer el gym? 💪' },
+                    { from: 'user', text: 'Sí me interesa, ¿cuándo puedo ir?' },
+                    { from: 'bot', text: 'Perfecto! Tenemos disponibilidad hoy de 16:00 a 20:00 y mañana de 10:00 a 13:00. ¿Qué horario te acomoda? 📅' },
+                  ].map((m, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + i * 0.15 }}
+                      className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
+                          m.from === 'user'
+                            ? 'bg-[#005C4B] text-white rounded-tr-sm'
+                            : 'bg-slate-800 text-slate-200 rounded-tl-sm'
+                        }`}
+                      >
+                        {m.text}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="bg-[#0a1628] px-4 pb-4">
+                  <div className="bg-slate-800/60 rounded-full px-4 py-2 text-xs text-slate-600">
+                    Escribí un mensaje...
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF BAR ── */}
+      {/* ── TRUST BAR ── */}
       <div className="border-y border-slate-800/60 bg-slate-900/20 py-5 px-6">
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8 text-sm text-slate-500">
-          {['Sin acceso a tu cuenta', '100% autónomo 24/7', 'Señal diaria a las 6 AM', 'Cancela cuando quieras', 'Hecho en Chile'].map((t, i) => (
+          {[
+            'API oficial WhatsApp Business',
+            'Setup en 7 días',
+            'Sin contratos de permanencia',
+            'Dashboard para tu equipo',
+            'Hecho en Chile 🇨🇱',
+          ].map((t, i) => (
             <div key={i} className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-cyan-500/60" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-500/60" />
               {t}
             </div>
           ))}
@@ -170,30 +276,33 @@ export default function SmartProIA() {
       </div>
 
       {/* ── CÓMO FUNCIONA ── */}
-      <section id="producto" className="py-28 px-6">
+      <section id="como-funciona" className="py-28 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <Badge>Cómo funciona</Badge>
-            <h2 className="text-4xl font-black text-white mt-4 mb-4">Sin complicaciones. Sin emociones.</h2>
-            <p className="text-slate-400 max-w-lg mx-auto">El bot hace el trabajo. Tú recibes la conclusión.</p>
+            <h2 className="text-4xl font-black text-white mt-4 mb-4">Del primer mensaje a cliente, solo.</h2>
+            <p className="text-slate-400 max-w-lg mx-auto">El bot hace el trabajo pesado. Tu equipo cierra el negocio.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-20">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                step: '01', title: 'Recopila datos',
-                desc: 'Funding rate, Long/Short ratio, Open Interest, Fear & Greed, volumen, RSI, MACD, noticias y más.',
-                icon: Bot, color: 'text-blue-400', bg: 'bg-blue-500/8',
+                step: '01',
+                title: 'Relevamos tu negocio',
+                desc: 'Entendemos cómo trabajás, qué preguntan tus clientes, cuáles son tus servicios y cómo querés que se los presente el bot.',
+                icon: Users, color: 'text-cyan-400', bg: 'bg-cyan-500/8',
               },
               {
-                step: '02', title: 'Analiza con IA',
-                desc: 'Clasifica 10+ variables y genera un score de confluencia. Prioriza NO-GO ante señales mixtas.',
-                icon: LineChart, color: 'text-cyan-400', bg: 'bg-cyan-500/8',
+                step: '02',
+                title: 'Configuramos tu bot',
+                desc: 'Diseñamos los flujos de conversación, integramos la IA, conectamos tu número de WhatsApp y configuramos el dashboard para tu equipo.',
+                icon: Bot, color: 'text-green-400', bg: 'bg-green-500/8',
               },
               {
-                step: '03', title: 'Señal al canal',
-                desc: 'Exactamente a las 6:00 AM publica la señal GO / CAUTION / NO-GO en el canal Telegram privado.',
-                icon: Bell, color: 'text-green-400', bg: 'bg-green-500/8',
+                step: '03',
+                title: 'Lo lanzamos en 7 días',
+                desc: 'Pruebas, ajustes finales y go live. Tu bot empieza a atender clientes en menos de una semana desde la consulta inicial.',
+                icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500/8',
               },
             ].map((s, i) => (
               <div key={i} className="relative bg-slate-900/50 border border-slate-800 rounded-2xl p-7 hover:border-slate-700 transition-colors">
@@ -206,17 +315,61 @@ export default function SmartProIA() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Signal types */}
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { signal: 'GO', emoji: '🟢', color: 'border-green-500/40 bg-green-950/20', text: 'text-green-400', desc: 'Confluencia alta en múltiples variables. Condiciones favorables para operar con gestión de riesgo.' },
-              { signal: 'CAUTION', emoji: '🟡', color: 'border-yellow-500/40 bg-yellow-950/20', text: 'text-yellow-400', desc: 'Señales mixtas. Reducir tamaño de posición o esperar mayor claridad antes de entrar.' },
-              { signal: 'NO-GO', emoji: '🔴', color: 'border-red-500/40 bg-red-950/20', text: 'text-red-400', desc: 'Señal débil o mercado adverso. La mejor decisión es no operar. Capital preservado.' },
-            ].map((s, i) => (
-              <div key={i} className={`border rounded-2xl p-6 ${s.color}`}>
-                <div className={`text-2xl font-black mb-2 ${s.text}`}>{s.emoji} {s.signal}</div>
-                <p className="text-sm text-slate-400 leading-relaxed">{s.desc}</p>
+      {/* ── CASOS DE USO ── */}
+      <section id="casos" className="py-28 px-6 bg-slate-900/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge>Casos de uso</Badge>
+            <h2 className="text-4xl font-black text-white mt-4 mb-4">¿En qué tipo de negocio funciona?</h2>
+            <p className="text-slate-400 max-w-lg mx-auto">Cualquier negocio que recibe consultas repetitivas puede automatizarlas.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {useCases.map((uc, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -4 }}
+                className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors"
+              >
+                <div className="text-3xl mb-4">{uc.icon}</div>
+                <h3 className="font-bold text-white mb-2">{uc.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-4">{uc.desc}</p>
+                <div className="text-xs text-slate-700 border-t border-slate-800 pt-3">
+                  {uc.example}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <p className="text-slate-500 text-sm mb-4">¿Tu negocio no está en la lista? Igual podemos ayudarte.</p>
+            <Btn href={WA_CONTACT} variant="outline">
+              <MessageCircle className="w-4 h-4" /> Consultar por WhatsApp
+            </Btn>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ── */}
+      <section className="py-28 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge>Qué incluye</Badge>
+            <h2 className="text-4xl font-black text-white mt-4 mb-4">Todo lo que necesitás para automatizar.</h2>
+            <p className="text-slate-400 max-w-lg mx-auto">No es solo el bot. Es el sistema completo.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((f, i) => (
+              <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-7 hover:border-slate-700 transition-colors">
+                <div className={`w-11 h-11 rounded-xl ${f.bg} flex items-center justify-center mb-5`}>
+                  <f.icon className={`w-5 h-5 ${f.color}`} />
+                </div>
+                <h3 className="font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -225,192 +378,59 @@ export default function SmartProIA() {
 
       {/* ── PRECIOS ── */}
       <section id="precios" className="py-28 px-6 bg-slate-900/20">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <Badge>Planes</Badge>
-            <h2 className="text-4xl font-black text-white mt-4 mb-4">Elige tu plan</h2>
-            <p className="text-slate-400">Sin contratos. Cancela cuando quieras.</p>
+            <h2 className="text-4xl font-black text-white mt-4 mb-4">Inversión clara. Sin sorpresas.</h2>
+            <p className="text-slate-400">Setup único + mantenimiento mensual. Sin contratos de permanencia.</p>
           </div>
 
-          {/* DCA highlight banner */}
-          <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-green-950/40 to-cyan-950/40 border border-green-900/30 flex flex-col sm:flex-row items-center gap-4">
-            <div className="text-2xl">🤖</div>
-            <div className="flex-1">
-              <p className="text-white font-bold text-sm">Nuevo: Bot DCA Automático — compra en caídas, vende en ganancia</p>
-              <p className="text-slate-400 text-xs mt-0.5">Estrategia de acumulación inteligente · Alta tasa de acierto en mercados tendenciales</p>
-            </div>
-            <a href={WA_DCA} target="_blank" rel="noopener noreferrer"
-              className="shrink-0 px-4 py-2 rounded-xl bg-green-500/20 border border-green-500/40 text-green-400 text-sm font-semibold hover:bg-green-500/30 transition-colors">
-              Cotizar →
-            </a>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <PriceCard
-              title="Canal Básico"
-              price="$15"
-              sub=" USD/mes"
+              title="Starter"
+              price="$150"
+              sub=" USD setup + $80/mes"
               features={[
-                'Señal diaria GO / NO-GO a las 6 AM',
-                'Análisis BTC completo',
-                'Fear & Greed + Noticias filtradas',
-                'Canal Telegram privado',
-                '7 días de prueba gratis',
+                '1 número WhatsApp Business',
+                'Bot con IA básica (hasta 5 flujos)',
+                'Dashboard Chatwoot para tu equipo',
+                'Reporte mensual de conversaciones',
+                'Soporte por WhatsApp',
+                'Setup en 7 días hábiles',
               ]}
-              cta="Suscribirme Básico"
-              href={MP_BASIC}
+              cta="Empezar con Starter"
+              href={WA_CONTACT}
             />
             <PriceCard
-              title="Canal PRO"
-              price="$25"
-              sub=" USD/mes"
+              title="Pro"
+              price="$250"
+              sub=" USD setup + $150/mes"
               highlight={true}
               features={[
-                'Todo del plan Básico',
-                'BTC + ETH + SOL análisis completo',
-                'Alertas en tiempo real',
-                'Análisis profundo los domingos',
-                'Soporte directo Telegram',
+                'Todo del plan Starter',
+                'Flujos ilimitados + IA avanzada',
+                'Múltiples agentes en Chatwoot',
+                'Reporte semanal detallado',
+                'Integraciones con tus sistemas',
+                'Soporte prioritario y ajustes mensuales',
               ]}
-              cta="Suscribirme PRO"
-              href={MP_PRO}
-            />
-            <PriceCard
-              title="Bot Propio"
-              price="$300"
-              sub=" USD único"
-              features={[
-                'Copia exacta del sistema SmartProIA',
-                'Configuración remota incluida (3-5 días)',
-                'Bot Telegram con tu branding',
-                'Corre solo 24/7 en tu PC o VPS',
-                '1 mes soporte por WhatsApp',
-              ]}
-              cta="Cotizar"
-              href={WA_BOT}
+              cta="Empezar con Pro"
+              href={WA_CONTACT}
             />
           </div>
-        </div>
-      </section>
 
-      {/* ── BOT DCA ── */}
-      <section className="py-24 px-6 bg-gradient-to-b from-green-950/10 to-transparent">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left — description */}
-            <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <Badge>Nuevo servicio</Badge>
-              <h2 className="text-4xl font-black text-white mt-4 mb-4">
-                Bot DCA Automático<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
-                  Alta tasa de acierto.
-                </span>
-              </h2>
-              <p className="text-slate-400 leading-relaxed mb-6">
-                Estrategia de acumulación inteligente: el bot compra automáticamente cuando BTC cae a niveles de soporte y vende cuando la posición entra en ganancia. Sin emociones, sin pantallas.
-              </p>
-              <div className="space-y-3 mb-8">
-                {[
-                  { icon: '📉', text: 'Detecta caídas de -3%, -6% y -10% desde el máximo diario' },
-                  { icon: '📊', text: 'Promedia el precio de entrada (3 niveles DCA progresivos)' },
-                  { icon: '✅', text: 'Vende automáticamente cuando la posición está en positivo' },
-                  { icon: '🛡️', text: 'Stop de emergencia configurado — capital siempre protegido' },
-                  { icon: '📲', text: 'Notificaciones en tiempo real a tu Telegram' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <span className="text-lg leading-none mt-0.5">{item.icon}</span>
-                    <span className="text-slate-300 text-sm">{item.text}</span>
-                  </div>
-                ))}
-              </div>
-              <Btn href={WA_DCA} variant="outline">
-                <MessageCircle className="w-4 h-4" /> Cotizar por WhatsApp
-              </Btn>
-            </motion.div>
-
-            {/* Right — pricing card */}
-            <motion.div initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <div className="bg-slate-900 border border-green-900/40 rounded-2xl p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <div className="text-4xl font-black text-white">$400</div>
-                    <div className="text-slate-500 text-sm">USD · setup único</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-green-400 font-bold text-sm">Alta tasa de acierto</div>
-                    <div className="text-slate-600 text-xs">en mercados tendenciales</div>
-                  </div>
-                </div>
-                <div className="space-y-3 mb-6">
-                  {[
-                    'Instalación remota en tu PC o VPS (3-5 días)',
-                    'Conectado a tu cuenta Exness o Binance',
-                    'Configuración personalizada de niveles',
-                    'Bot Telegram con alertas en tiempo real',
-                    '1 mes de soporte incluido por WhatsApp',
-                    'Código propio — no depende de terceros',
-                  ].map((f, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
-                      <span className="text-slate-300 text-sm">{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <a href={WA_DCA} target="_blank" rel="noopener noreferrer"
-                  className="block w-full text-center py-3 px-6 rounded-xl bg-green-500 text-slate-900 font-bold hover:bg-green-400 transition-colors">
-                  Quiero este bot →
-                </a>
-                <p className="text-slate-600 text-xs text-center mt-3">Sin suscripción mensual · Pago único · Tuyo para siempre</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── POR QUÉ SMARTPROIA ── */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <Badge>Por qué somos diferentes</Badge>
-            <h2 className="text-4xl font-black text-white mt-4 mb-4">Transparencia total. Sin promesas vacías.</h2>
-            <p className="text-slate-400 max-w-lg mx-auto">El 30% de los grupos de señales crypto son estafas. Nosotros operamos diferente.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: TrendingUp, color: 'text-green-400', bg: 'bg-green-500/8',
-                title: 'Accuracy verificable',
-                desc: 'Publicamos resultados reales sin capturas selectivas. Win rate honesto — los datos hablan solos, sin promesas vacías del 90%.',
-              },
-              {
-                icon: Shield, color: 'text-cyan-400', bg: 'bg-cyan-500/8',
-                title: 'Sin acceso a tu cuenta',
-                desc: 'Nunca pedimos tus API keys, claves ni fondos. El sistema solo envía señales. Tú decides si operas o no, siempre.',
-              },
-              {
-                icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/8',
-                title: 'Soporte real y rápido',
-                desc: 'Respondemos en horas, no en días. Sin respuestas automáticas ni formularios. Trato directo con el equipo.',
-              },
-            ].map((d, i) => (
-              <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-7 hover:border-slate-700 transition-colors">
-                <div className={`w-11 h-11 rounded-xl ${d.bg} flex items-center justify-center mb-5`}>
-                  <d.icon className={`w-5 h-5 ${d.color}`} />
-                </div>
-                <h3 className="font-bold text-white mb-2">{d.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{d.desc}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-center text-slate-600 text-sm mt-8">
+            ¿Tenés un proyecto a medida o querés cotizar antes? Escribinos y lo evaluamos juntos.
+          </p>
         </div>
       </section>
 
       {/* ── TESTIMONIOS ── */}
-      <section className="py-16 px-6">
+      <section className="py-28 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <Badge>Testimonios</Badge>
-            <h2 className="text-4xl font-black text-white mt-4">Lo que dicen los usuarios</h2>
+            <h2 className="text-4xl font-black text-white mt-4">Lo que dicen nuestros clientes</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
@@ -431,103 +451,8 @@ export default function SmartProIA() {
         </div>
       </section>
 
-      {/* ── SERVICIOS FREELANCE ── */}
-      <section id="servicios" className="py-28 px-6 bg-slate-900/20">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge>Servicios a medida</Badge>
-            <h2 className="text-4xl font-black text-white mt-4 mb-4">¿Necesitas automatizar algo?</h2>
-            <p className="text-slate-400 max-w-lg mx-auto">Construimos bots, agentes IA y sistemas de automatización desde cero para tu negocio.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { price: '$150', title: 'Bot Telegram', icon: Bot, desc: 'Bot personalizado que responde consultas, reporta info y ejecuta comandos automáticos.', time: '2-3 días' },
-              { price: '$200', title: 'Bot WhatsApp', icon: Smartphone, desc: 'Atención automatizada por WhatsApp con IA. Ideal para negocios, comercios y emprendedores.', time: '3-4 días' },
-              { price: '$300', title: 'Sistema de señales', icon: LineChart, desc: 'La misma infraestructura de SmartProIA en tu servidor. Pretrade, análisis IA y canal privado.', time: '3-5 días' },
-              { price: '$500', title: 'Agente IA autónomo', icon: Zap, desc: 'Agente con memoria, skills, acceso a internet y APIs externas. Operativo 24/7 sin supervisión.', time: '1-2 semanas' },
-            ].map((s, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -4 }}
-                className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors"
-              >
-                <s.icon className="w-5 h-5 text-cyan-400/60 mb-3" />
-                <div className="text-2xl font-black text-cyan-400 mb-1">{s.price}</div>
-                <h3 className="font-bold text-white text-sm mb-2">{s.title}</h3>
-                <p className="text-slate-500 text-xs leading-relaxed mb-4">{s.desc}</p>
-                <div className="text-xs text-slate-700 border-t border-slate-800 pt-3">⏱ {s.time}</div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <Btn href={WA_BOT} variant="outline">
-              <MessageCircle className="w-4 h-4" /> Consultar por WhatsApp
-            </Btn>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FEEDBACK ── */}
-      <section className="py-20 px-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <Badge>Tu opinión importa</Badge>
-            <h2 className="text-3xl font-black text-white mt-4 mb-3">¿Qué te gustaría ver en SmartProIA?</h2>
-            <p className="text-slate-400 text-sm">Selecciona lo que más te interesa. Lo usamos para priorizar lo que construimos.</p>
-          </div>
-          {fbSent ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-12"
-            >
-              <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <p className="text-white font-semibold">¡Gracias por tu feedback!</p>
-              <p className="text-slate-400 text-sm mt-1">Lo tenemos en cuenta para las próximas mejoras.</p>
-            </motion.div>
-          ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
-              <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                {[
-                  'Bot de señales para altcoins',
-                  'Bot de WhatsApp para mi negocio',
-                  'Agente IA autónomo propio',
-                  'Screener de activos técnico',
-                  'Señales ETH / SOL separadas',
-                  'Tutorial: cómo operar señales',
-                ].map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => toggleFb(opt)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm text-left transition-all ${
-                      fbOptions.includes(opt)
-                        ? 'border-cyan-500/60 bg-cyan-500/8 text-white'
-                        : 'border-slate-800 bg-slate-900/50 text-slate-400 hover:border-slate-700 hover:text-white'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all ${
-                      fbOptions.includes(opt) ? 'border-cyan-400 bg-cyan-400' : 'border-slate-600'
-                    }`}>
-                      {fbOptions.includes(opt) && <span className="text-slate-900 text-[10px] font-black leading-none">✓</span>}
-                    </div>
-                    {opt}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={submitFeedback}
-                disabled={!fbOptions.length}
-                className="w-full py-3 px-6 rounded-xl bg-cyan-500 text-slate-900 font-bold text-sm hover:bg-cyan-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                Enviar respuesta
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
-      <section id="faq" className="py-28 px-6">
+      <section id="faq" className="py-28 px-6 bg-slate-900/20">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <Badge>FAQ</Badge>
@@ -541,17 +466,22 @@ export default function SmartProIA() {
       <section className="py-28 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-3xl blur-xl" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-3xl blur-xl" />
             <div className="relative bg-slate-900 border border-slate-800 rounded-3xl p-14">
-              <Zap className="w-12 h-12 text-cyan-400 mx-auto mb-6" />
-              <h2 className="text-4xl font-black text-white mb-4">Empieza hoy. Sin pagar.</h2>
+              <MessageCircle className="w-12 h-12 text-green-400 mx-auto mb-6" />
+              <h2 className="text-4xl font-black text-white mb-4">Agendá una demo gratis.</h2>
               <p className="text-slate-400 mb-8 leading-relaxed">
-                7 días gratis para probar el sistema. Si no te convence, no pagas nada.
+                En 30 minutos te mostramos cómo funciona el bot con un ejemplo real para tu negocio. Sin compromiso.
               </p>
-              <Btn onClick={openLead} className="mx-auto text-lg px-8 py-4">
-                Quiero probarlo gratis <ArrowRight className="w-5 h-5" />
-              </Btn>
-              <p className="text-slate-700 text-xs mt-6">Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras</p>
+              <a
+                href={WA_DEMO}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-8 py-4 text-lg transition-all shadow-lg shadow-green-500/20 mx-auto"
+              >
+                <MessageCircle className="w-5 h-5" /> Hablar por WhatsApp <ArrowRight className="w-5 h-5" />
+              </a>
+              <p className="text-slate-700 text-xs mt-6">Sin tarjeta de crédito · Sin compromiso · Respondemos en menos de 2 horas</p>
             </div>
           </div>
         </div>
@@ -563,24 +493,43 @@ export default function SmartProIA() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
               <div className="text-xl font-black text-white tracking-tight mb-1">
-                SmartPro<span className="text-cyan-400">IA</span>
+                SmartPro<span className="text-green-400">IA</span>
               </div>
               <div className="text-xs text-slate-600">smartproia.com · hola@smartproia.com</div>
             </div>
             <div className="flex gap-6 text-xs text-slate-600">
-              <a href="#producto" className="hover:text-slate-400 transition-colors">Producto</a>
+              <a href="#como-funciona" className="hover:text-slate-400 transition-colors">Cómo funciona</a>
+              <a href="#casos" className="hover:text-slate-400 transition-colors">Casos de uso</a>
               <a href="#precios" className="hover:text-slate-400 transition-colors">Precios</a>
-              <a href="#servicios" className="hover:text-slate-400 transition-colors">Servicios</a>
               <a href="#faq" className="hover:text-slate-400 transition-colors">FAQ</a>
-              <a href={WA_BOT} target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">Contacto</a>
+              <a href={WA_CONTACT} target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">Contacto</a>
             </div>
           </div>
           <div className="border-t border-slate-900 mt-8 pt-6 flex flex-col md:flex-row gap-2 justify-between text-xs text-slate-700">
-            <span>🇨🇱 Hecho en Chile con IA autónoma · © 2026 SmartProIA</span>
-            <span>Las señales son análisis automatizados, no constituyen asesoría financiera.</span>
+            <span>🇨🇱 Hecho en Chile · Bots WhatsApp IA para negocios · © 2026 SmartProIA</span>
+            <span>Los resultados pueden variar según el tipo de negocio y la configuración del bot.</span>
           </div>
         </div>
       </footer>
+
+      {/* ── TRADING SECTION (HIDDEN — preserved for potential restore) ── */}
+      {/*
+      TRADING SIGNALS SECTION — commented out 2026-03-18 (pivot to bot services)
+      To restore: uncomment and revert page.tsx from git history
+
+      Original sections:
+        - Hero: Señales Crypto con IA, 6AM, GO/CAUTION/NO-GO
+        - LiveSignal component
+        - PriceCards: Canal Básico $15/mes, Canal PRO $25/mes, Bot Propio $300
+        - Bot DCA section ($400 setup)
+        - Accuracy badge from /api/accuracy
+        - Feedback section (bot para altcoins, etc.)
+      Original WA links:
+        const MP_BASIC = '/api/checkout?plan=basico';
+        const MP_PRO   = '/api/checkout?plan=pro';
+        const WA_BOT   = 'https://wa.me/56962326907?text=Hola%2C+quiero+cotizar+un+bot+propio+SmartProIA';
+        const WA_DCA   = 'https://wa.me/56962326907?text=Hola%2C+me+interesa+el+Bot+DCA';
+      */}
     </div>
   );
 }
