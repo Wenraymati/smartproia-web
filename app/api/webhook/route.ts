@@ -38,7 +38,7 @@ function checkSignature(req: NextRequest): boolean {
     ? createHmac("sha256", MP_TEST_WEBHOOK_SECRET).update(manifest).digest("hex") === v1
     : false;
   if (!prodOk && !testOk) {
-    console.warn("[webhook] signature mismatch — rejecting");
+    console.error("[webhook] Invalid webhook signature - rejecting request");
     return false;
   }
   return true;
@@ -283,7 +283,7 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
 
   if (!checkSignature(req)) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   let body: { type?: string; action?: string; data?: { id?: string } };
