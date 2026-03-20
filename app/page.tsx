@@ -14,6 +14,7 @@ import { FAQ } from './components/FAQ';
 import { MobileNav } from './components/MobileNav';
 import { StickyCTA } from './components/StickyCTA';
 import { LeadModal } from './components/LeadModal';
+import { RoiCalculator } from './components/RoiCalculator';
 
 /* ─── Constants ─────────────────────────────────────────────── */
 const WA_DEMO = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20una%20demo%20del%20bot%20de%20WhatsApp%20para%20mi%20negocio';
@@ -404,6 +405,25 @@ export default function SmartProIA() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── ROI CALCULATOR ── */}
+      <section className="py-28 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge>Calculadora de ROI</Badge>
+            <h2 className="text-4xl font-black text-white mt-4 mb-4">
+              ¿Cuánto te cuesta{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+                no tener el bot?
+              </span>
+            </h2>
+            <p className="text-slate-400 max-w-lg mx-auto">
+              Calculá el costo real de responder WhatsApp manualmente y cuánto recuperarías con automatización.
+            </p>
+          </div>
+          <RoiCalculator />
         </div>
       </section>
 
