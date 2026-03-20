@@ -482,6 +482,7 @@ function StepResult({
           href={checkoutHref}
           target={checkoutExternal ? '_blank' : undefined}
           rel={checkoutExternal ? 'noopener noreferrer' : undefined}
+          onClick={() => track(plan.checkoutPlan === 'wa' ? 'cotizar:cta_wa' : 'cotizar:cta_mp')}
           className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl py-4 transition-all shadow-lg shadow-green-500/20 text-base"
         >
           {plan.checkoutPlan === 'wa' ? (
@@ -494,6 +495,7 @@ function StepResult({
           href={`${WA_BASE}?text=${waText}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => track('cotizar:cta_wa')}
           className="w-full inline-flex items-center justify-center gap-2 border border-slate-700 text-slate-300 hover:border-green-500 hover:text-green-400 font-semibold rounded-xl py-3.5 transition-all text-sm"
         >
           <MessageCircle className="w-4 h-4" /> Hablar primero por WhatsApp

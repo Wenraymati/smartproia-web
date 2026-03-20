@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { PublicStats } from './api/stats/route';
 import { motion } from 'framer-motion';
 import {
   ArrowRight, Bot, CheckCircle2, MessageCircle, Star, Shield,
@@ -18,6 +19,15 @@ import { RoiCalculator } from './components/RoiCalculator';
 
 /* ─── Constants ─────────────────────────────────────────────── */
 const WA_DEMO = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20una%20demo%20del%20bot%20de%20WhatsApp%20para%20mi%20negocio';
+
+/* ─── Tracking helper ────────────────────────────────────────── */
+function track(event: string) {
+  fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event }),
+  }).catch(() => {});
+}
 const WA_CONTACT = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20bots%20de%20WhatsApp';
 
 /* ─── Testimonials ───────────────────────────────────────────── */
@@ -108,6 +118,14 @@ const features = [
 export default function SmartProIA() {
   const [leadModal, setLeadModal] = useState(false);
   const openLead = () => setLeadModal(true);
+  const [stats, setStats] = useState<PublicStats | null>(null);
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then((r) => r.json())
+      .then((d: PublicStats) => setStats(d))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased selection:bg-green-500/20">
@@ -177,6 +195,7 @@ export default function SmartProIA() {
                   href={WA_DEMO}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track('landing:cta_demo')}
                   className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-7 py-3.5 text-base transition-all shadow-lg shadow-green-500/20"
                 >
                   <MessageCircle className="w-4 h-4" /> Ver demo gratis
@@ -193,6 +212,7 @@ export default function SmartProIA() {
               <div className="mb-12">
                 <a
                   href="/cotizar"
+                  onClick={() => track('landing:cta_cotizar')}
                   className="inline-flex items-center gap-1.5 text-sm text-green-400/70 hover:text-green-400 transition-colors underline-offset-4 hover:underline"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -205,8 +225,8 @@ export default function SmartProIA() {
                 {[
                   { n: '24/7', label: 'Sin descanso' },
                   { n: '7d', label: 'Setup listo' },
-                  { n: '2+', label: 'Bots activos' },
-                  { n: '0', label: 'Leads perdidos' },
+                  { n: stats ? `${stats.botsActive}` : '2', label: 'Bots activos' },
+                  { n: stats ? `${stats.totalLeads}+` : '0', label: 'Leads capturados' },
                 ].map((st, i) => (
                   <div key={i}>
                     <div className="text-3xl font-black text-white">{st.n}</div>
