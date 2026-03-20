@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, MessageCircle } from 'lucide-react';
+import { Menu, X, MessageCircle, ChevronRight } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'Cómo funciona', href: '#como-funciona' },
@@ -76,6 +76,16 @@ export function MobileNav({ onCtaClick }: MobileNavProps) {
                     {l.label}
                   </a>
                 ))}
+
+                {/* Cotizar — highlighted entry */}
+                <a
+                  href="/cotizar"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 flex items-center justify-between px-4 py-3 text-green-400 hover:text-green-300 hover:bg-green-500/8 rounded-xl transition-colors font-semibold border border-green-500/20 hover:border-green-500/40"
+                >
+                  <span>Cotizar gratis</span>
+                  <ChevronRight className="w-4 h-4 opacity-60" />
+                </a>
               </nav>
 
               {/* CTA */}

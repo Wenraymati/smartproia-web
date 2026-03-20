@@ -124,6 +124,7 @@ export default function SmartProIA() {
             <a href="#como-funciona" className="hover:text-white transition-colors">Cómo funciona</a>
             <a href="#casos" className="hover:text-white transition-colors">Casos de uso</a>
             <a href="#precios" className="hover:text-white transition-colors">Precios</a>
+            <a href="/cotizar" className="hover:text-white transition-colors text-green-400/80 hover:text-green-400">Cotizar</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
           {/* Desktop CTA */}
@@ -170,7 +171,7 @@ export default function SmartProIA() {
                 <strong className="text-white">atienda el doble sin contratar a nadie más.</strong>
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 mb-12">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <a
                   href={WA_DEMO}
                   target="_blank"
@@ -184,6 +185,17 @@ export default function SmartProIA() {
                   className="inline-flex items-center justify-center text-slate-400 hover:text-white text-base transition-colors underline-offset-4 hover:underline px-4"
                 >
                   Ver precios
+                </a>
+              </div>
+
+              {/* Cotizar CTA — tertiary */}
+              <div className="mb-12">
+                <a
+                  href="/cotizar"
+                  className="inline-flex items-center gap-1.5 text-sm text-green-400/70 hover:text-green-400 transition-colors underline-offset-4 hover:underline"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
+                  Cotizar en 2 minutos — gratis, sin compromiso
                 </a>
               </div>
 
@@ -439,7 +451,11 @@ export default function SmartProIA() {
           </div>
 
           <p className="text-center text-slate-600 text-sm mt-8">
-            ¿Tenés un proyecto a medida o querés cotizar antes? Escribinos y lo evaluamos juntos.
+            ¿Tenés un proyecto a medida o querés cotizar antes?{' '}
+            <a href="/cotizar" className="text-green-400/70 hover:text-green-400 underline underline-offset-2 transition-colors">
+              Cotizá en 2 minutos
+            </a>{' '}
+            o escribinos y lo evaluamos juntos.
           </p>
         </div>
       </section>
@@ -500,7 +516,15 @@ export default function SmartProIA() {
               >
                 <MessageCircle className="w-5 h-5" /> Hablar por WhatsApp <ArrowRight className="w-5 h-5" />
               </a>
-              <p className="text-slate-700 text-xs mt-6">Sin tarjeta de crédito · Sin compromiso · Respondemos en menos de 2 horas</p>
+              <div className="mt-5">
+                <a
+                  href="/cotizar"
+                  className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-green-400 transition-colors underline-offset-4 hover:underline"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" /> O cotizá ahora en 2 minutos
+                </a>
+              </div>
+              <p className="text-slate-700 text-xs mt-4">Sin tarjeta de crédito · Sin compromiso · Respondemos en menos de 2 horas</p>
             </div>
           </div>
         </div>
@@ -520,6 +544,7 @@ export default function SmartProIA() {
               <a href="#como-funciona" className="hover:text-slate-400 transition-colors">Cómo funciona</a>
               <a href="#casos" className="hover:text-slate-400 transition-colors">Casos de uso</a>
               <a href="#precios" className="hover:text-slate-400 transition-colors">Precios</a>
+              <a href="/cotizar" className="hover:text-slate-400 transition-colors">Cotizar</a>
               <a href="#faq" className="hover:text-slate-400 transition-colors">FAQ</a>
               <a href={WA_CONTACT} target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">Contacto</a>
             </div>
