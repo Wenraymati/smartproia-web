@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import { getRedis } from "@/lib/redis";
 import {
   getGymBotHealth,
   getRuizRuizHealth,
@@ -10,45 +9,8 @@ import {
   type GymBotMetrics,
   type RuizRuizStats,
 } from "@/lib/bot-client";
-import { StatCard } from "../components/StatCard";
 import { StatusDot } from "../components/StatusDot";
 import { TestSignalButton } from "../components/TestSignalButton";
-
-interface Subscriber {
-  email: string;
-  name?: string;
-  plan: string;
-  status: string;
-  joinedAt: string;
-}
-
-async function getSmartProIAData() {
-  const redis = getRedis();
-  const emails = (await redis.smembers("subscribers")) as string[];
-
-  if (!emails.length) {
-    return { total: 0, byPlan: {} as Record<string, number>, recent: 0 };
-  }
-
-  const pipeline = redis.pipeline();
-  for (const email of emails) pipeline.get(`subscriber:${email}`);
-  const results = await pipeline.exec();
-
-  const subscribers = results
-    .map((r) => (typeof r === "string" ? JSON.parse(r) : r))
-    .filter((r): r is Subscriber => Boolean(r));
-
-  const byPlan: Record<string, number> = {};
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  let recent = 0;
-
-  for (const s of subscribers) {
-    byPlan[s.plan] = (byPlan[s.plan] || 0) + 1;
-    if (new Date(s.joinedAt).getTime() > sevenDaysAgo) recent++;
-  }
-
-  return { total: subscribers.length, byPlan, recent };
-}
 
 function botStatus(health: BotHealthResponse | null): "online" | "offline" {
   return health?.status === "ok" ? "online" : "offline";
@@ -62,19 +24,12 @@ export default async function AdminDashboard() {
     day: "numeric",
   });
 
-  const [gymHealth, ruizHealth, gymMetrics, ruizStats, smartData] =
-    await Promise.all([
-      getGymBotHealth(),
-      getRuizRuizHealth(),
-      getGymBotMetrics(),
-      getRuizRuizStats(),
-      getSmartProIAData(),
-    ]);
-
-  const { total, byPlan, recent } = smartData;
-  const basicCount = byPlan["Básico"] || 0;
-  const proCount = byPlan["PRO"] || 0;
-  const mrr = basicCount * 15 + proCount * 25;
+  const [gymHealth, ruizHealth, gymMetrics, ruizStats] = await Promise.all([
+    getGymBotHealth(),
+    getRuizRuizHealth(),
+    getGymBotMetrics(),
+    getRuizRuizStats(),
+  ]);
 
   const gymOnline = botStatus(gymHealth);
   const ruizOnline = botStatus(ruizHealth);
@@ -87,35 +42,10 @@ export default async function AdminDashboard() {
         <p className="text-slate-500 text-sm mt-1 capitalize">{today}</p>
       </div>
 
-      {/* SmartProIA section */}
-      <section className="mb-10">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
-          SmartProIA
-        </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="MRR (USD)"
-            value={`$${mrr}`}
-            sub={`${recent} nuevos esta semana`}
-            color="green"
-          />
-          <StatCard
-            label="Total Suscriptores"
-            value={total}
-            color="cyan"
-          />
-          <StatCard
-            label="Canal VIP ($15)"
-            value={basicCount}
-            color="slate"
-          />
-          <StatCard
-            label="Plan PRO ($25)"
-            value={proCount}
-            color="cyan"
-          />
-        </div>
-      </section>
+      {/* SmartProIA subscriptions — disabled */}
+      <div className="mb-8 text-slate-500 text-sm">
+        Módulo de suscripciones desactivado — datos en construcción
+      </div>
 
       {/* Acciones Rapidas section */}
       <section className="mb-10">

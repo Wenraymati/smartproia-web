@@ -34,6 +34,22 @@ async function checkService(
   }
 }
 
+const QR_INSTANCES = [
+  {
+    id: "gymbot-ludus",
+    displayName: "Gymbot - Ludus",
+    instanceName: "gymbot-ludus",
+  },
+  {
+    id: "ruizruiz",
+    displayName: "Ruiz & Ruiz",
+    instanceName: "ruizruiz",
+  },
+] as const;
+
+const EVO_API_BASE = "https://api.smartproia.com";
+const EVO_API_KEY = "smartproia-evo-2026";
+
 export default async function InfraPage() {
   const gymUrl = process.env.GYMBOT_URL ?? "";
   const ruizUrl = process.env.RUIZRUIZ_URL ?? "";
@@ -89,12 +105,35 @@ export default async function InfraPage() {
         </div>
       </div>
 
+      {/* WhatsApp QR Connection */}
+      <section className="mb-10">
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          Conexión WhatsApp
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {QR_INSTANCES.map((instance) => (
+            <QRCard
+              key={instance.id}
+              displayName={instance.displayName}
+              instanceName={instance.instanceName}
+              qrUrl={`${EVO_API_BASE}/instance/connect/${instance.instanceName}`}
+              apiKey={EVO_API_KEY}
+            />
+          ))}
+        </div>
+      </section>
+
       {/* Services grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {services.map((svc) => (
-          <ServiceCard key={svc.name} service={svc} />
-        ))}
-      </div>
+      <section className="mb-6">
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          Servicios
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {services.map((svc) => (
+            <ServiceCard key={svc.name} service={svc} />
+          ))}
+        </div>
+      </section>
 
       {/* Summary bar */}
       <div className="mt-6 bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center gap-4">
@@ -113,6 +152,81 @@ export default async function InfraPage() {
         <p className="text-slate-500 text-xs shrink-0">
           Avg {Math.round(services.reduce((a, s) => a + s.ms, 0) / services.length)}ms
         </p>
+      </div>
+    </div>
+  );
+}
+
+function QRCard({
+  displayName,
+  instanceName,
+  qrUrl,
+  apiKey,
+}: {
+  displayName: string;
+  instanceName: string;
+  qrUrl: string;
+  apiKey: string;
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-white font-semibold text-sm">{displayName}</p>
+          <p className="text-slate-500 text-xs mt-0.5 font-mono">{instanceName}</p>
+        </div>
+        <span className="text-xs px-2 py-0.5 rounded-full border bg-cyan-500/10 text-cyan-400 border-cyan-500/20 font-medium">
+          WhatsApp
+        </span>
+      </div>
+
+      <a
+        href={qrUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 transition-colors mb-4"
+      >
+        Obtener QR
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="w-3.5 h-3.5"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5z"
+            clipRule="evenodd"
+          />
+          <path
+            fillRule="evenodd"
+            d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </a>
+
+      <div className="space-y-2 text-xs text-slate-500">
+        <p>
+          El enlace devuelve JSON con un campo{" "}
+          <code className="font-mono text-slate-400">base64</code>. Pega el
+          valor en{" "}
+          <a
+            href="https://base64.guru/converter/decode/image"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-500 hover:text-cyan-400 underline underline-offset-2"
+          >
+            base64.guru
+          </a>{" "}
+          para ver el QR y escanearlo desde WhatsApp &gt; Dispositivos vinculados.
+        </p>
+        <p className="text-amber-500/80">QR expira en ~60 segundos.</p>
+        <div className="mt-3 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 font-mono text-slate-400">
+          <span className="text-slate-600">header: </span>apikey:{" "}
+          <span className="text-cyan-400/80">{apiKey}</span>
+        </div>
       </div>
     </div>
   );
