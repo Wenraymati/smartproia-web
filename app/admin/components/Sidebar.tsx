@@ -7,7 +7,9 @@ const navItems = [
   { href: "/admin/empresas", label: "Empresas", icon: "◫" },
   { href: "/admin/bots", label: "Leads", icon: "◎" },
   { href: "/admin/infra", label: "Infra", icon: "⬡" },
+  { href: "/admin/qr", label: "QR WhatsApp", icon: "▣" },
   { href: "/admin/vault", label: "Accesos", icon: "⊛" },
+  { href: "/admin/credentials", label: "Credenciales", icon: "🔐" },
   { href: "/admin/links", label: "Links", icon: "⊞" },
   { href: "/admin/audit", label: "Auditoría", icon: "📋" },
 ];
@@ -18,7 +20,7 @@ const mobileNavItems = [
   { href: "/admin/empresas", label: "Empresas", icon: "📊" },
   { href: "/admin/bots", label: "Leads", icon: "👥" },
   { href: "/admin/infra", label: "Infra", icon: "🖥️" },
-  { href: "/admin/vault", label: "Accesos", icon: "🔑" },
+  { href: "/admin/qr", label: "QR", icon: "📱" },
 ];
 
 export function Sidebar() {
@@ -36,7 +38,7 @@ export function Sidebar() {
         <p className="text-white font-bold text-sm">SmartProIA</p>
         <p className="text-slate-500 text-xs">Admin Panel</p>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active =
             item.href === "/admin"

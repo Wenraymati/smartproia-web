@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { StatusDot } from "../../components/StatusDot";
 
 interface ServiceResult {
@@ -46,9 +47,6 @@ const QR_INSTANCES = [
     instanceName: "ruizruiz",
   },
 ] as const;
-
-const EVO_API_BASE = "https://api.smartproia.com";
-const EVO_API_KEY = "smartproia-evo-2026";
 
 export default async function InfraPage() {
   const gymUrl = process.env.GYMBOT_URL ?? "";
@@ -116,8 +114,6 @@ export default async function InfraPage() {
               key={instance.id}
               displayName={instance.displayName}
               instanceName={instance.instanceName}
-              qrUrl={`${EVO_API_BASE}/instance/connect/${instance.instanceName}`}
-              apiKey={EVO_API_KEY}
             />
           ))}
         </div>
@@ -160,13 +156,9 @@ export default async function InfraPage() {
 function QRCard({
   displayName,
   instanceName,
-  qrUrl,
-  apiKey,
 }: {
   displayName: string;
   instanceName: string;
-  qrUrl: string;
-  apiKey: string;
 }) {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
@@ -180,13 +172,11 @@ function QRCard({
         </span>
       </div>
 
-      <a
-        href={qrUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href="/admin/qr"
         className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 transition-colors mb-4"
       >
-        Obtener QR
+        Ver QR en panel
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
@@ -196,37 +186,18 @@ function QRCard({
         >
           <path
             fillRule="evenodd"
-            d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5z"
-            clipRule="evenodd"
-          />
-          <path
-            fillRule="evenodd"
-            d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z"
+            d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
             clipRule="evenodd"
           />
         </svg>
-      </a>
+      </Link>
 
       <div className="space-y-2 text-xs text-slate-500">
         <p>
-          El enlace devuelve JSON con un campo{" "}
-          <code className="font-mono text-slate-400">base64</code>. Pega el
-          valor en{" "}
-          <a
-            href="https://base64.guru/converter/decode/image"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cyan-500 hover:text-cyan-400 underline underline-offset-2"
-          >
-            base64.guru
-          </a>{" "}
-          para ver el QR y escanearlo desde WhatsApp &gt; Dispositivos vinculados.
+          El panel muestra el QR en tiempo real con auto-refresh cada 55s.
+          Escanear desde WhatsApp &gt; Dispositivos vinculados.
         </p>
         <p className="text-amber-500/80">QR expira en ~60 segundos.</p>
-        <div className="mt-3 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 font-mono text-slate-400">
-          <span className="text-slate-600">header: </span>apikey:{" "}
-          <span className="text-cyan-400/80">{apiKey}</span>
-        </div>
       </div>
     </div>
   );
