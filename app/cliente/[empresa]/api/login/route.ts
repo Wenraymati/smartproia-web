@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ empresa: string }> }
 ) {
   const { empresa } = await params;
-  const envToken = TOKEN_MAP[empresa];
+  const envToken = TOKEN_MAP[empresa]?.trim();
 
   if (!envToken) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
