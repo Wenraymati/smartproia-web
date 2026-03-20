@@ -1,14 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
-
-function getRedis() {
-  return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
-}
+import { getRedis } from "@/lib/redis";
 
 export async function POST(req: NextRequest) {
   const { email, source = "landing" } = await req.json();

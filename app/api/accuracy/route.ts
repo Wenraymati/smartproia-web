@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
+import { getRedis } from "@/lib/redis";
 
 export const revalidate = 3600; // refresh hourly
-
-function getRedis() {
-  return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
-}
 
 export interface AccuracyStats {
   total: number;

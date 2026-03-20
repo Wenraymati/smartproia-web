@@ -2,14 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
-import { Redis } from "@upstash/redis";
-
-function getRedis() {
-  return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
-}
+import { getRedis } from "@/lib/redis";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID!;

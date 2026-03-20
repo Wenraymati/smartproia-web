@@ -1,27 +1,13 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import { timingSafeEqual } from "crypto";
-import { Redis } from "@upstash/redis";
-
-function isValidAdminSecret(provided: string | undefined): boolean {
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected || !provided) return false;
-  try {
-    const a = Buffer.from(provided, "utf8");
-    const b = Buffer.from(expected, "utf8");
-    if (a.length !== b.length) return false;
-    return timingSafeEqual(a, b);
-  } catch { return false; }
-}
+import { isValidAdminSecret } from "@/lib/auth";
+import { getRedis } from "@/lib/redis";
 
 async function getData(secret: string | undefined) {
   if (!isValidAdminSecret(secret)) return null;
 
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+  const redis = getRedis();
 
   const emails = (await redis.smembers("subscribers")) as string[];
   const leadsRaw = (await redis.smembers("leads")) as string[];

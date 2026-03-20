@@ -1,0 +1,283 @@
+export const dynamic = "force-dynamic";
+
+import { getRedis } from "@/lib/redis";
+import {
+  getGymBotHealth,
+  getRuizRuizHealth,
+  getGymBotMetrics,
+  getRuizRuizStats,
+  type BotHealthResponse,
+  type GymBotMetrics,
+  type RuizRuizStats,
+} from "@/lib/bot-client";
+import { StatCard } from "../components/StatCard";
+import { StatusDot } from "../components/StatusDot";
+
+interface Subscriber {
+  email: string;
+  name?: string;
+  plan: string;
+  status: string;
+  joinedAt: string;
+}
+
+async function getSmartProIAData() {
+  const redis = getRedis();
+  const emails = (await redis.smembers("subscribers")) as string[];
+
+  if (!emails.length) {
+    return { total: 0, byPlan: {} as Record<string, number>, recent: 0 };
+  }
+
+  const pipeline = redis.pipeline();
+  for (const email of emails) pipeline.get(`subscriber:${email}`);
+  const results = await pipeline.exec();
+
+  const subscribers = results
+    .map((r) => (typeof r === "string" ? JSON.parse(r) : r))
+    .filter((r): r is Subscriber => Boolean(r));
+
+  const byPlan: Record<string, number> = {};
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  let recent = 0;
+
+  for (const s of subscribers) {
+    byPlan[s.plan] = (byPlan[s.plan] || 0) + 1;
+    if (new Date(s.joinedAt).getTime() > sevenDaysAgo) recent++;
+  }
+
+  return { total: subscribers.length, byPlan, recent };
+}
+
+function botStatus(health: BotHealthResponse | null): "online" | "offline" {
+  return health?.status === "ok" ? "online" : "offline";
+}
+
+function formatUptime(seconds: number | undefined): string {
+  if (!seconds) return "—";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+export default async function AdminDashboard() {
+  const today = new Date().toLocaleDateString("es-CL", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const [gymHealth, ruizHealth, gymMetrics, ruizStats, smartData] =
+    await Promise.all([
+      getGymBotHealth(),
+      getRuizRuizHealth(),
+      getGymBotMetrics(),
+      getRuizRuizStats(),
+      getSmartProIAData(),
+    ]);
+
+  const { total, byPlan, recent } = smartData;
+  const basicCount = byPlan["Básico"] || 0;
+  const proCount = byPlan["PRO"] || 0;
+  const mrr = basicCount * 15 + proCount * 25;
+
+  const gymOnline = botStatus(gymHealth);
+  const ruizOnline = botStatus(ruizHealth);
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <p className="text-slate-500 text-sm mt-1 capitalize">{today}</p>
+      </div>
+
+      {/* SmartProIA section */}
+      <section className="mb-10">
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          SmartProIA
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="MRR (USD)"
+            value={`$${mrr}`}
+            sub={`${recent} nuevos esta semana`}
+            color="green"
+          />
+          <StatCard
+            label="Total Suscriptores"
+            value={total}
+            color="cyan"
+          />
+          <StatCard
+            label="Canal VIP ($15)"
+            value={basicCount}
+            color="slate"
+          />
+          <StatCard
+            label="Plan PRO ($25)"
+            value={proCount}
+            color="cyan"
+          />
+        </div>
+      </section>
+
+      {/* Bots section */}
+      <section>
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          Bots WhatsApp
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* GymBot card */}
+          <BotCard
+            name="GymBot Ludus"
+            status={gymOnline}
+            uptime={gymHealth?.uptime}
+            version={gymHealth?.version}
+            metrics={gymMetrics}
+          />
+
+          {/* Ruiz & Ruiz card */}
+          <RuizCard
+            name="Ruiz & Ruiz"
+            status={ruizOnline}
+            uptime={ruizHealth?.uptime}
+            version={ruizHealth?.version}
+            stats={ruizStats}
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function BotCard({
+  name,
+  status,
+  uptime,
+  version,
+  metrics,
+}: {
+  name: string;
+  status: "online" | "offline";
+  uptime?: number;
+  version?: string;
+  metrics: GymBotMetrics | null;
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <StatusDot status={status} />
+          <div>
+            <p className="text-white font-semibold text-sm">{name}</p>
+            <p className="text-slate-500 text-xs">
+              {status === "online"
+                ? `Uptime ${formatUptime(uptime)}${version ? ` · v${version}` : ""}`
+                : "Sin respuesta"}
+            </p>
+          </div>
+        </div>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+            status === "online"
+              ? "bg-green-500/10 text-green-400 border-green-500/20"
+              : "bg-red-500/10 text-red-400 border-red-500/20"
+          }`}
+        >
+          {status}
+        </span>
+      </div>
+
+      {metrics ? (
+        <div className="grid grid-cols-4 gap-3 mt-4">
+          <MetricPill label="Total" value={metrics.totalLeads} color="slate" />
+          <MetricPill label="Hot" value={metrics.hotLeads} color="red" />
+          <MetricPill label="Warm" value={metrics.warmLeads} color="yellow" />
+          <MetricPill label="Cold" value={metrics.coldLeads} color="slate" />
+        </div>
+      ) : (
+        <p className="text-slate-600 text-xs mt-4">Métricas no disponibles</p>
+      )}
+    </div>
+  );
+}
+
+function RuizCard({
+  name,
+  status,
+  uptime,
+  version,
+  stats,
+}: {
+  name: string;
+  status: "online" | "offline";
+  uptime?: number;
+  version?: string;
+  stats: RuizRuizStats | null;
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <StatusDot status={status} />
+          <div>
+            <p className="text-white font-semibold text-sm">{name}</p>
+            <p className="text-slate-500 text-xs">
+              {status === "online"
+                ? `Uptime ${formatUptime(uptime)}${version ? ` · v${version}` : ""}`
+                : "Sin respuesta"}
+            </p>
+          </div>
+        </div>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+            status === "online"
+              ? "bg-green-500/10 text-green-400 border-green-500/20"
+              : "bg-red-500/10 text-red-400 border-red-500/20"
+          }`}
+        >
+          {status}
+        </span>
+      </div>
+
+      {stats ? (
+        <div className="flex flex-wrap gap-3 mt-4">
+          <MetricPill label="Total" value={stats.totalLeads} color="slate" />
+          {Object.entries(stats.byEstado).map(([estado, count]) => (
+            <MetricPill key={estado} label={estado} value={count} color="cyan" />
+          ))}
+        </div>
+      ) : (
+        <p className="text-slate-600 text-xs mt-4">Stats no disponibles</p>
+      )}
+    </div>
+  );
+}
+
+const pillColors = {
+  red: "bg-red-500/10 text-red-400 border-red-500/20",
+  yellow: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  slate: "bg-slate-800 text-slate-300 border-slate-700",
+};
+
+function MetricPill({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: keyof typeof pillColors;
+}) {
+  return (
+    <div
+      className={`flex-1 min-w-[60px] rounded-lg border px-3 py-2 text-center ${pillColors[color]}`}
+    >
+      <p className="text-lg font-bold">{value}</p>
+      <p className="text-xs opacity-70">{label}</p>
+    </div>
+  );
+}
