@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isValidSession, SESSION_COOKIE_NAME } from "@/lib/auth";
 import { getRedis } from "@/lib/redis";
+import { logAudit } from "@/lib/audit";
 import type { SignalData } from "@/app/api/update-signal/route";
 
 export async function POST(req: NextRequest) {
@@ -35,6 +36,15 @@ export async function POST(req: NextRequest) {
     await redis.set("signal:latest", JSON.stringify(testSignal), { ex: 86400 });
     await redis.lpush("signal:history", JSON.stringify(testSignal));
     await redis.ltrim("signal:history", 0, 29);
+
+    await logAudit({
+      action: "signal.test",
+      target: "redis:signal:latest",
+      detail: "Señal de prueba enviada",
+      ip: req.headers.get("x-forwarded-for") ?? "unknown",
+      ts: Date.now(),
+    });
+
     return NextResponse.json({ ok: true, signal: testSignal });
   } catch (e) {
     console.error("Redis error:", e);

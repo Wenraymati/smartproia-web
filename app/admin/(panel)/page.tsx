@@ -11,6 +11,7 @@ import {
 } from "@/lib/bot-client";
 import { StatusDot } from "../components/StatusDot";
 import { TestSignalButton } from "../components/TestSignalButton";
+import { WaReconnectBanner } from "../components/WaReconnectBanner";
 
 function botStatus(health: BotHealthResponse | null): "online" | "offline" {
   return health?.status === "ok" ? "online" : "offline";
@@ -42,6 +43,9 @@ export default async function AdminDashboard() {
         <p className="text-slate-500 text-sm mt-1 capitalize">{today}</p>
       </div>
 
+      {/* WhatsApp reconnect alert banner */}
+      <WaReconnectBanner />
+
       {/* SmartProIA subscriptions — disabled */}
       <div className="mb-8 text-slate-500 text-sm">
         Módulo de suscripciones desactivado — datos en construcción
@@ -53,7 +57,7 @@ export default async function AdminDashboard() {
           Acciones Rapidas
         </h2>
         <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div>
               <p className="text-white text-sm font-medium mb-0.5">
                 Pipeline de senales
@@ -63,7 +67,7 @@ export default async function AdminDashboard() {
                 LiveSignal
               </p>
             </div>
-            <div className="ml-auto">
+            <div className="sm:ml-auto">
               <TestSignalButton />
             </div>
           </div>
@@ -75,7 +79,7 @@ export default async function AdminDashboard() {
         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
           Bots WhatsApp
         </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* GymBot card */}
           <BotCard
             name="GymBot Ludus"

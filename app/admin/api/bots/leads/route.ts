@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isValidSession, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function PATCH(req: NextRequest) {
   const session = req.cookies.get(SESSION_COOKIE_NAME)?.value ?? "";
@@ -7,7 +8,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { bot, id, estado, notas } = await req.json() as {
+  const { bot, id, estado, notas } = (await req.json()) as {
     bot: "gymbot" | "ruizruiz";
     id: number;
     estado: string;
@@ -37,6 +38,14 @@ export async function PATCH(req: NextRequest) {
   if (!res.ok) {
     return NextResponse.json({ error: "Bot error" }, { status: res.status });
   }
+
+  await logAudit({
+    action: "lead.status_update",
+    target: `${bot}:lead:${id}`,
+    detail: `Estado → ${estado}`,
+    ip: req.headers.get("x-forwarded-for") ?? "unknown",
+    ts: Date.now(),
+  });
 
   return NextResponse.json({ ok: true });
 }

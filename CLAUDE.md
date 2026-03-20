@@ -34,6 +34,14 @@ Nunca hardcodear. Todas en `.env` local y en Vercel Dashboard.
 | `UPSTASH_REDIS_REST_TOKEN` | Token Upstash |
 | `MERCADOPAGO_ACCESS_TOKEN` | Token MP producción |
 | `RESEND_API_KEY` | API key Resend |
+| `GYMBOT_URL` | URL del bot gymbot en Railway |
+| `GYMBOT_DASHBOARD_TOKEN` | Token x-dashboard-token gymbot |
+| `RUIZRUIZ_URL` | URL del bot ruizruiz en Railway |
+| `RUIZRUIZ_DASHBOARD_TOKEN` | Token x-dashboard-token ruizruiz |
+| `EVOLUTION_API_URL` | URL Evolution API (https://api.smartproia.com) |
+| `EVOLUTION_API_KEY` | API key Evolution API |
+| `LUDUS_CLIENT_TOKEN` | Token acceso portal cliente Ludus |
+| `RUIZRUIZ_CLIENT_TOKEN` | Token acceso portal cliente Ruiz & Ruiz |
 
 ## Pipeline de Señales
 

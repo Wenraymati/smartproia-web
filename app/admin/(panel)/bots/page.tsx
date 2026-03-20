@@ -81,7 +81,7 @@ export default async function BotsPage() {
         </h2>
 
         {gymMetrics ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <StatCard
               label="Leads Hoy"
               value={gymMetrics.today_leads}
@@ -126,45 +126,96 @@ export default async function BotsPage() {
           gymLeads.length === 0 ? (
             <EmptyState message="Sin leads registrados aún." />
           ) : (
-            <LeadsTable>
-              <thead>
-                <tr className="border-b border-slate-700">
-                  <Th>Teléfono</Th>
-                  <Th>Nombre</Th>
-                  <Th>Plan</Th>
-                  <Th>Score</Th>
-                  <Th>Temperatura</Th>
-                  <Th>Estado</Th>
-                  <Th>Última interacción</Th>
-                  <Th>Fecha</Th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
+            <>
+              {/* Mobile card view */}
+              <div className="md:hidden space-y-3">
                 {gymLeads.map((lead: GymBotLead) => (
-                  <tr
+                  <div
                     key={lead.id}
-                    className="hover:bg-slate-800/50 transition-colors"
+                    className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-4 space-y-2"
                   >
-                    <Td mono>{lead.telefono ?? "—"}</Td>
-                    <Td>{lead.nombre ?? "—"}</Td>
-                    <Td dimmed>{lead.plan_interes ?? "—"}</Td>
-                    <Td>{lead.score}</Td>
-                    <td className="py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-100">
+                        {lead.nombre ?? "Sin nombre"}
+                      </span>
                       <TempBadge temperature={lead.temperature} />
-                    </td>
-                    <td className="py-3 px-4">
+                    </div>
+                    {lead.telefono && (
+                      <a
+                        href={`tel:${lead.telefono}`}
+                        className="text-sm text-cyan-400 hover:underline block"
+                      >
+                        📞 {lead.telefono}
+                      </a>
+                    )}
+                    <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                      {lead.plan_interes && (
+                        <span>🏋️ {lead.plan_interes}</span>
+                      )}
+                      {lead.goal && <span>🎯 {lead.goal}</span>}
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
                       <LeadStatusSelect
                         bot="gymbot"
                         id={lead.id}
                         current={lead.estado}
                       />
-                    </td>
-                    <Td dimmed>{formatUnixDate(lead.last_interaction)}</Td>
-                    <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
-                  </tr>
+                      <span className="text-xs text-slate-500">
+                        {formatUnixDate(lead.created_at)}
+                      </span>
+                    </div>
+                    {lead.notas && (
+                      <p className="text-xs text-slate-400 truncate">
+                        {lead.notas}
+                      </p>
+                    )}
+                  </div>
                 ))}
-              </tbody>
-            </LeadsTable>
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden md:block">
+                <LeadsTable>
+                  <thead>
+                    <tr className="border-b border-slate-700">
+                      <Th>Teléfono</Th>
+                      <Th>Nombre</Th>
+                      <Th>Plan</Th>
+                      <Th>Score</Th>
+                      <Th>Temperatura</Th>
+                      <Th>Estado</Th>
+                      <Th>Última interacción</Th>
+                      <Th>Fecha</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {gymLeads.map((lead: GymBotLead) => (
+                      <tr
+                        key={lead.id}
+                        className="hover:bg-slate-800/50 transition-colors"
+                      >
+                        <Td mono>{lead.telefono ?? "—"}</Td>
+                        <Td>{lead.nombre ?? "—"}</Td>
+                        <Td dimmed>{lead.plan_interes ?? "—"}</Td>
+                        <Td>{lead.score}</Td>
+                        <td className="py-3 px-4">
+                          <TempBadge temperature={lead.temperature} />
+                        </td>
+                        <td className="py-3 px-4">
+                          <LeadStatusSelect
+                            bot="gymbot"
+                            id={lead.id}
+                            current={lead.estado}
+                          />
+                        </td>
+                        <Td dimmed>{formatUnixDate(lead.last_interaction)}</Td>
+                        <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </LeadsTable>
+              </div>
+            </>
           )
         ) : (
           <UnavailableCard name="GymBot Ludus" />
@@ -194,49 +245,110 @@ export default async function BotsPage() {
           ruizLeads.length === 0 ? (
             <EmptyState message="Sin leads registrados aún." />
           ) : (
-            <LeadsTable>
-              <thead>
-                <tr className="border-b border-slate-700">
-                  <Th>Teléfono</Th>
-                  <Th>Nombre</Th>
-                  <Th>Servicio</Th>
-                  <Th>Score</Th>
-                  <Th>Estado</Th>
-                  <Th>Urgente</Th>
-                  <Th>Fecha</Th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
+            <>
+              {/* Mobile card view */}
+              <div className="md:hidden space-y-3">
                 {ruizLeads.map((lead: RuizRuizLead) => (
-                  <tr
+                  <div
                     key={lead.id}
-                    className="hover:bg-slate-800/50 transition-colors"
+                    className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-4 space-y-2"
                   >
-                    <Td mono>{lead.telefono ?? "—"}</Td>
-                    <Td>{lead.nombre ?? "—"}</Td>
-                    <Td dimmed>{lead.servicio ?? "—"}</Td>
-                    <Td>{lead.score}</Td>
-                    <td className="py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-100">
+                        {lead.nombre ?? "Sin nombre"}
+                      </span>
+                      <span
+                        className={`text-xs font-medium ${
+                          lead.estado === "nuevo"
+                            ? "text-cyan-400"
+                            : lead.estado === "contactado"
+                              ? "text-blue-400"
+                              : lead.estado === "cerrado"
+                                ? "text-green-400"
+                                : "text-red-400"
+                        }`}
+                      >
+                        {lead.estado}
+                      </span>
+                    </div>
+                    {lead.telefono && (
+                      <a
+                        href={`tel:${lead.telefono}`}
+                        className="text-sm text-cyan-400 hover:underline block"
+                      >
+                        📞 {lead.telefono}
+                      </a>
+                    )}
+                    <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                      {lead.servicio && <span>💼 {lead.servicio}</span>}
+                      {lead.tamano_empresa && (
+                        <span>🏢 {lead.tamano_empresa}</span>
+                      )}
+                      {lead.urgencia > 7 && (
+                        <span className="text-orange-400">⚡ Urgente</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
                       <LeadStatusSelect
                         bot="ruizruiz"
                         id={lead.id}
                         current={lead.estado}
                       />
-                    </td>
-                    <td className="py-3 px-4">
-                      {lead.urgencia === 1 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-500/15 text-red-400 border-red-500/25">
-                          Si
-                        </span>
-                      ) : (
-                        <span className="text-slate-600 text-xs">No</span>
-                      )}
-                    </td>
-                    <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
-                  </tr>
+                      <span className="text-xs text-slate-500">
+                        {formatUnixDate(lead.created_at)}
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </LeadsTable>
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden md:block">
+                <LeadsTable>
+                  <thead>
+                    <tr className="border-b border-slate-700">
+                      <Th>Teléfono</Th>
+                      <Th>Nombre</Th>
+                      <Th>Servicio</Th>
+                      <Th>Score</Th>
+                      <Th>Estado</Th>
+                      <Th>Urgente</Th>
+                      <Th>Fecha</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {ruizLeads.map((lead: RuizRuizLead) => (
+                      <tr
+                        key={lead.id}
+                        className="hover:bg-slate-800/50 transition-colors"
+                      >
+                        <Td mono>{lead.telefono ?? "—"}</Td>
+                        <Td>{lead.nombre ?? "—"}</Td>
+                        <Td dimmed>{lead.servicio ?? "—"}</Td>
+                        <Td>{lead.score}</Td>
+                        <td className="py-3 px-4">
+                          <LeadStatusSelect
+                            bot="ruizruiz"
+                            id={lead.id}
+                            current={lead.estado}
+                          />
+                        </td>
+                        <td className="py-3 px-4">
+                          {lead.urgencia === 1 ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-500/15 text-red-400 border-red-500/25">
+                              Si
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 text-xs">No</span>
+                          )}
+                        </td>
+                        <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </LeadsTable>
+              </div>
+            </>
           )
         ) : (
           <UnavailableCard name="Ruiz &amp; Ruiz" />
