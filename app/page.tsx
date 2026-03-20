@@ -22,6 +22,12 @@ const WA_CONTACT = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20m%C3%A1s%2
 /* ─── Testimonials ───────────────────────────────────────────── */
 const testimonials = [
   {
+    name: 'Ruiz & Ruiz Abogados',
+    role: 'Estudio jurídico, Santiago',
+    text: 'El bot atiende consultas de honorarios y agenda reuniones automáticamente. Ahora mi equipo se enfoca en los casos, no en responder WhatsApp.',
+    stars: 5,
+  },
+  {
     name: 'Marcelo F.',
     role: 'Dueño de gimnasio, Santiago',
     text: 'Antes perdíamos leads porque nadie respondía los mensajes de noche. Ahora el bot agenda clases solo y nosotros llegamos a trabajar con las citas ya confirmadas.',
@@ -31,12 +37,6 @@ const testimonials = [
     name: 'Carolina V.',
     role: 'Clínica estética, Providencia',
     text: 'El bot responde preguntas de precios, disponibilidad y hasta envía la dirección con el mapa. El equipo solo toma el control cuando el cliente ya está listo para pagar.',
-    stars: 5,
-  },
-  {
-    name: 'Rodrigo S.',
-    role: 'Inmobiliaria, Viña del Mar',
-    text: 'Lo que más me sorprendió es que el bot califica a los leads antes de pasarlos. Solo recibimos consultas de gente que ya tiene intención real de comprar.',
     stars: 5,
   },
 ];
@@ -124,6 +124,7 @@ export default function SmartProIA() {
             <a href="#como-funciona" className="hover:text-white transition-colors">Cómo funciona</a>
             <a href="#casos" className="hover:text-white transition-colors">Casos de uso</a>
             <a href="#precios" className="hover:text-white transition-colors">Precios</a>
+            <a href="/cotizar" className="hover:text-white transition-colors text-green-400/80 hover:text-green-400">Cotizar</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
           {/* Desktop CTA */}
@@ -159,30 +160,43 @@ export default function SmartProIA() {
                 </Badge>
               </div>
               <h1 className="text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
-                Tu negocio en<br />
-                WhatsApp,<br />
+                Tu empresa nunca pierde<br />
+                un cliente{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
-                  en piloto automático.
+                  por falta de respuesta.
                 </span>
               </h1>
               <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-lg">
-                Bots con IA que{' '}
-                <strong className="text-white">atienden, califican y cierran leads</strong>{' '}
-                24/7 por WhatsApp. Sin contratar más personal. Sin perder consultas.
+                Automatizamos WhatsApp para que tu equipo{' '}
+                <strong className="text-white">atienda el doble sin contratar a nadie más.</strong>
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 mb-12">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <a
                   href={WA_DEMO}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-7 py-3.5 text-base transition-all shadow-lg shadow-green-500/20"
                 >
-                  <MessageCircle className="w-4 h-4" /> Quiero mi bot
+                  <MessageCircle className="w-4 h-4" /> Ver demo gratis
                 </a>
-                <Btn href="#como-funciona" variant="outline" className="text-base px-7 py-3.5">
-                  Ver cómo funciona
-                </Btn>
+                <a
+                  href="#precios"
+                  className="inline-flex items-center justify-center text-slate-400 hover:text-white text-base transition-colors underline-offset-4 hover:underline px-4"
+                >
+                  Ver precios
+                </a>
+              </div>
+
+              {/* Cotizar CTA — tertiary */}
+              <div className="mb-12">
+                <a
+                  href="/cotizar"
+                  className="inline-flex items-center gap-1.5 text-sm text-green-400/70 hover:text-green-400 transition-colors underline-offset-4 hover:underline"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
+                  Cotizar en 2 minutos — gratis, sin compromiso
+                </a>
               </div>
 
               {/* Stats */}
@@ -256,6 +270,23 @@ export default function SmartProIA() {
           </div>
         </div>
       </section>
+
+      {/* ── SOCIAL PROOF BAR ── */}
+      <div className="border-y border-green-500/10 bg-green-500/3 py-6 px-6">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-10 text-sm">
+          {[
+            { n: '7', label: 'Empresas activas' },
+            { n: '+2.400', label: 'Mensajes automatizados' },
+            { n: 'Meta', label: 'Business Partner' },
+            { n: 'ES', label: 'Soporte en español' },
+          ].map((item, i) => (
+            <div key={i} className="text-center">
+              <div className="text-2xl font-black text-white">{item.n}</div>
+              <div className="text-xs text-slate-500 uppercase tracking-widest mt-0.5">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ── TRUST BAR ── */}
       <div className="border-y border-slate-800/60 bg-slate-900/20 py-5 px-6">
@@ -420,7 +451,11 @@ export default function SmartProIA() {
           </div>
 
           <p className="text-center text-slate-600 text-sm mt-8">
-            ¿Tenés un proyecto a medida o querés cotizar antes? Escribinos y lo evaluamos juntos.
+            ¿Tenés un proyecto a medida o querés cotizar antes?{' '}
+            <a href="/cotizar" className="text-green-400/70 hover:text-green-400 underline underline-offset-2 transition-colors">
+              Cotizá en 2 minutos
+            </a>{' '}
+            o escribinos y lo evaluamos juntos.
           </p>
         </div>
       </section>
@@ -481,7 +516,15 @@ export default function SmartProIA() {
               >
                 <MessageCircle className="w-5 h-5" /> Hablar por WhatsApp <ArrowRight className="w-5 h-5" />
               </a>
-              <p className="text-slate-700 text-xs mt-6">Sin tarjeta de crédito · Sin compromiso · Respondemos en menos de 2 horas</p>
+              <div className="mt-5">
+                <a
+                  href="/cotizar"
+                  className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-green-400 transition-colors underline-offset-4 hover:underline"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" /> O cotizá ahora en 2 minutos
+                </a>
+              </div>
+              <p className="text-slate-700 text-xs mt-4">Sin tarjeta de crédito · Sin compromiso · Respondemos en menos de 2 horas</p>
             </div>
           </div>
         </div>
@@ -501,6 +544,7 @@ export default function SmartProIA() {
               <a href="#como-funciona" className="hover:text-slate-400 transition-colors">Cómo funciona</a>
               <a href="#casos" className="hover:text-slate-400 transition-colors">Casos de uso</a>
               <a href="#precios" className="hover:text-slate-400 transition-colors">Precios</a>
+              <a href="/cotizar" className="hover:text-slate-400 transition-colors">Cotizar</a>
               <a href="#faq" className="hover:text-slate-400 transition-colors">FAQ</a>
               <a href={WA_CONTACT} target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">Contacto</a>
             </div>

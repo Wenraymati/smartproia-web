@@ -1,0 +1,39 @@
+name: Claude Security Scan
+
+on:
+  pull_request:
+    paths:
+      - 'app/api/**'
+      - 'lib/**'
+      - 'middleware.ts'
+      - 'package.json'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Security Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            Security audit for API/middleware changes in SmartProIA:
+
+            1. Hardcoded secrets, tokens, or API keys in code
+            2. HMAC validation present in all webhook routes
+            3. Auth guards on all /admin/* routes (middleware.ts coverage)
+            4. Redis key patterns (no injection vectors in dynamic keys)
+            5. CORS and security headers in next.config.ts
+            6. MercadoPago signature validation in /api/webhook
+            7. Input validation on /api/lead and other public endpoints
+
+            Report ONLY critical and high severity findings.
+            Format: [FILE:LINE] Issue | Risk | Recommended fix
+          model: claude-haiku-4-5-20251001

@@ -5,9 +5,16 @@ import { notFound } from "next/navigation";
 import { generateSessionToken } from "@/lib/auth";
 import {
   getGymBotLeads,
+  getGymBotMetrics,
+  getGymBotHealth,
   getRuizRuizLeads,
+  getRuizRuizStats,
+  getRuizRuizHealth,
   type GymBotLead,
+  type GymBotMetrics,
+  type BotHealthResponse,
   type RuizRuizLead,
+  type RuizRuizStats,
 } from "@/lib/bot-client";
 
 // ---- Config ----------------------------------------------------------------
@@ -103,6 +110,123 @@ function EstadoBadge({ estado }: { estado: string }) {
     >
       {estado}
     </span>
+  );
+}
+
+// ---- Bot status pill --------------------------------------------------------
+
+function BotStatusPill({ health }: { health: BotHealthResponse | null }) {
+  if (!health) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-400 border border-slate-600">
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+        Desconocido
+      </span>
+    );
+  }
+  if (health.status === "ok") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/25">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+        Online
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/15 text-red-400 border border-red-500/25">
+      <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+      Offline
+    </span>
+  );
+}
+
+// ---- Stat card --------------------------------------------------------------
+
+function StatCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
+      <p className="text-slate-500 text-xs uppercase tracking-wider mb-1">{label}</p>
+      <p className={`text-2xl font-black ${accent ? "text-green-400" : "text-white"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ---- Stats sections --------------------------------------------------------
+
+function RuizRuizStatsSection({
+  stats,
+  health,
+}: {
+  stats: RuizRuizStats | null;
+  health: BotHealthResponse | null;
+}) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+          Estado del bot
+        </p>
+        <BotStatusPill health={health} />
+      </div>
+      {stats ? (
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard label="Total leads" value={stats.total} />
+          <StatCard label="Leads hoy" value={stats.hoy} accent={stats.hoy > 0} />
+          <StatCard label="Esta semana" value={stats.nuevo} />
+          <StatCard label="Urgentes" value={stats.urgentes} accent={stats.urgentes > 0} />
+        </div>
+      ) : (
+        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-xs">
+          No se pudieron cargar las estadísticas del bot.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LudusStatsSection({
+  metrics,
+  health,
+  totalLeads,
+}: {
+  metrics: GymBotMetrics | null;
+  health: BotHealthResponse | null;
+  totalLeads: number;
+}) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+          Estado del bot
+        </p>
+        <BotStatusPill health={health} />
+      </div>
+      {metrics ? (
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard label="Total leads" value={totalLeads} />
+          <StatCard label="Leads hoy" value={metrics.today_leads} accent={metrics.today_leads > 0} />
+          <StatCard label="Hot leads" value={metrics.hot + metrics.critical} accent={(metrics.hot + metrics.critical) > 0} />
+          <StatCard label="Conversión" value={`${metrics.conversion_rate}%`} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard label="Total leads" value={totalLeads} />
+          <div className="col-span-1 bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex items-center">
+            <p className="text-yellow-400 text-xs">Métricas no disponibles</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -354,6 +478,16 @@ function EmptyState() {
   );
 }
 
+// ---- Refresh hint ----------------------------------------------------------
+
+function RefreshHint() {
+  return (
+    <p className="text-slate-700 text-xs text-center mt-2 mb-6">
+      Recarga la página para ver datos actualizados.
+    </p>
+  );
+}
+
 // ---- Page ------------------------------------------------------------------
 
 export default async function ClientePortalPage({
@@ -399,9 +533,13 @@ export default async function ClientePortalPage({
     );
   }
 
-  // Fetch leads based on empresa
+  // Fetch data based on empresa
   if (validEmpresa === "ludus") {
-    const leads = await getGymBotLeads();
+    const [leads, metrics, health] = await Promise.all([
+      getGymBotLeads(),
+      getGymBotMetrics(),
+      getGymBotHealth(),
+    ]);
 
     return (
       <div className="max-w-lg mx-auto">
@@ -411,6 +549,18 @@ export default async function ClientePortalPage({
           totalLeads={leads?.length ?? 0}
         />
 
+        {/* Stats section */}
+        <LudusStatsSection
+          metrics={metrics}
+          health={health}
+          totalLeads={leads?.length ?? 0}
+        />
+        <RefreshHint />
+
+        {/* Divider */}
+        <div className="border-t border-slate-800 mb-6" />
+
+        {/* Leads list */}
         {!leads ? (
           <UnavailableCard name={empresaNombre} />
         ) : leads.length === 0 ? (
@@ -431,7 +581,11 @@ export default async function ClientePortalPage({
   }
 
   // ruizruiz
-  const leads = await getRuizRuizLeads();
+  const [leads, stats, health] = await Promise.all([
+    getRuizRuizLeads(),
+    getRuizRuizStats(),
+    getRuizRuizHealth(),
+  ]);
 
   return (
     <div className="max-w-lg mx-auto">
@@ -441,6 +595,14 @@ export default async function ClientePortalPage({
         totalLeads={leads?.length ?? 0}
       />
 
+      {/* Stats section */}
+      <RuizRuizStatsSection stats={stats} health={health} />
+      <RefreshHint />
+
+      {/* Divider */}
+      <div className="border-t border-slate-800 mb-6" />
+
+      {/* Leads list */}
       {!leads ? (
         <UnavailableCard name={empresaNombre} />
       ) : leads.length === 0 ? (

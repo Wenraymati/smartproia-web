@@ -1,0 +1,43 @@
+name: Claude Code PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'components/**'
+      - 'src/**'
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code PR Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            Review this pull request for SmartProIA (Next.js 15 + React 19 + TypeScript strict).
+
+            Check for:
+            1. TypeScript strict violations or `any` types without justification
+            2. Missing error handling (unhandled promises, no try-catch in API routes)
+            3. Security issues (exposed secrets, missing auth checks, unvalidated input)
+            4. Next.js App Router best practices (server vs client components, Suspense)
+            5. Performance issues (unnecessary re-renders, missing loading states)
+            6. Hardcoded values that should be env vars (prices, URLs, tokens)
+
+            Be concise. Only report actual issues, not style preferences.
+            Use risk levels: 🔴 Critical | 🟠 High | 🟡 Medium | ⚪ Low
+          model: claude-haiku-4-5-20251001
