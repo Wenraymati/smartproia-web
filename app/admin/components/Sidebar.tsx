@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "◈" },
+  { href: "/admin/finance", label: "Finanzas", icon: "💰" },
   { href: "/admin/empresas", label: "Empresas", icon: "◫" },
   { href: "/admin/bots", label: "Leads", icon: "◎" },
   { href: "/admin/infra", label: "Infra", icon: "⬡" },
@@ -17,7 +18,7 @@ const navItems = [
 // The 5 primary items shown in the mobile bottom bar
 const mobileNavItems = [
   { href: "/admin", label: "Dashboard", icon: "🏠" },
-  { href: "/admin/empresas", label: "Empresas", icon: "📊" },
+  { href: "/admin/finance", label: "Finanzas", icon: "💰" },
   { href: "/admin/bots", label: "Leads", icon: "👥" },
   { href: "/admin/infra", label: "Infra", icon: "🖥️" },
   { href: "/admin/qr", label: "QR", icon: "📱" },
