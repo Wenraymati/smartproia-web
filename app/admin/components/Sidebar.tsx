@@ -4,9 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "◈" },
-  { href: "/admin/bots", label: "Bots", icon: "◎" },
+  { href: "/admin/empresas", label: "Empresas", icon: "◫" },
+  { href: "/admin/bots", label: "Leads", icon: "◎" },
   { href: "/admin/infra", label: "Infraestructura", icon: "⬡" },
-  { href: "/admin/links", label: "Links Rápidos", icon: "⊞" },
+  { href: "/admin/vault", label: "Accesos", icon: "⊛" },
+  { href: "/admin/links", label: "Links", icon: "⊞" },
 ];
 
 export function Sidebar() {

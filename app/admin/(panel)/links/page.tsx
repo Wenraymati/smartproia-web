@@ -3,116 +3,128 @@ export const dynamic = "force-dynamic";
 interface LinkItem {
   label: string;
   href: string;
-  description?: string;
+  description: string;
   requiresAuth?: boolean;
 }
 
 interface LinkCategory {
   title: string;
-  icon: string;
+  subtitle?: string;
+  adminOnly: boolean;
   links: LinkItem[];
 }
 
 const categories: LinkCategory[] = [
   {
-    title: "Produccion",
-    icon: "◈",
+    title: "Admin — VPS",
+    subtitle: "Solo acceso administrador",
+    adminOnly: true,
     links: [
+      {
+        label: "Evolution Manager",
+        href: "https://manager.smartproia.com",
+        description: "GUI para instancias WhatsApp — QR, estado, webhooks",
+      },
+      {
+        label: "Uptime Kuma",
+        href: "https://uptime.smartproia.com",
+        description: "Monitoreo 24/7 de todos los servicios",
+      },
+      {
+        label: "Chatwoot (Admin)",
+        href: "https://chat.smartproia.com",
+        description:
+          "Inbox de soporte — configurar cuentas, inboxes, agentes",
+      },
+      {
+        label: "Evolution API Docs",
+        href: "https://api.smartproia.com/api/v1/swagger",
+        description: "Documentacion de la API (Swagger UI)",
+      },
+    ],
+  },
+  {
+    title: "Admin — Deployments",
+    subtitle: "Gestión de código e infraestructura",
+    adminOnly: true,
+    links: [
+      {
+        label: "Vercel — smartproia-web",
+        href: "https://vercel.com/smartproias-projects/smartproia-web",
+        description: "Deployments, logs, env vars de la web",
+      },
+      {
+        label: "Railway — GymBot",
+        href: "https://railway.com",
+        description: "Logs, deploys y variables del gymbot-ludus",
+        requiresAuth: true,
+      },
+      {
+        label: "Railway — Ruiz & Ruiz",
+        href: "https://railway.com",
+        description: "Logs, deploys y variables del ruizruiz-bot",
+        requiresAuth: true,
+      },
+      {
+        label: "GitHub — Organizacion",
+        href: "https://github.com/Wenraymati",
+        description: "Repositorios de todos los proyectos",
+      },
+    ],
+  },
+  {
+    title: "Cliente — Acceso público",
+    subtitle: "Links que se entregan al cliente",
+    adminOnly: false,
+    links: [
+      {
+        label: "Chatwoot — Inbox",
+        href: "https://chat.smartproia.com",
+        description:
+          "El cliente accede aquí para ver conversaciones de WhatsApp",
+      },
       {
         label: "SmartProIA Web",
         href: "https://smartproia.com",
-        description: "Sitio principal en produccion",
-      },
-      {
-        label: "Dashboard Usuarios",
-        href: "https://smartproia.com/dashboard",
-        description: "Panel de suscriptores",
-      },
-      {
-        label: "Infra Admin",
-        href: "/admin/infra",
-        description: "Estado de servicios",
+        description: "Sitio web principal",
       },
     ],
   },
   {
-    title: "Bots Railway",
-    icon: "◎",
+    title: "APIs Externas",
+    subtitle: "Servicios de terceros",
+    adminOnly: true,
     links: [
       {
-        label: "GymBot — Railway",
-        href: "https://railway.com/project",
-        description: "Wenraymati/gymbot · requiere auth",
-        requiresAuth: true,
+        label: "Upstash Console",
+        href: "https://console.upstash.com",
+        description: "Redis — señales, suscriptores, caché",
       },
       {
-        label: "Ruiz & Ruiz — Railway",
-        href: "https://railway.com/project",
-        description: "Wenraymati/ruizruiz-bot · requiere auth",
-        requiresAuth: true,
+        label: "Resend Dashboard",
+        href: "https://resend.com",
+        description: "Emails transaccionales y métricas de entrega",
+      },
+      {
+        label: "Mercado Pago",
+        href: "https://www.mercadopago.com.ar/developers",
+        description: "Pagos, suscripciones y webhooks",
       },
     ],
   },
   {
-    title: "VPS",
-    icon: "⬡",
-    links: [
-      {
-        label: "Chatwoot",
-        href: "https://chatwoot.smartproia.com",
-        description: "CRM conversaciones",
-      },
-      {
-        label: "Evolution API",
-        href: "https://api.smartproia.com",
-        description: "API WhatsApp",
-      },
-      {
-        label: "Monitor HTTP",
-        href: "http://187.77.243.217:8766",
-        description: "Dashboard VPS :8766",
-      },
-      {
-        label: "Hostinger Panel",
-        href: "https://hpanel.hostinger.com",
-        description: "Control VPS 187.77.243.217",
-      },
-    ],
-  },
-  {
-    title: "Repositorios",
-    icon: "⊞",
-    links: [
-      {
-        label: "smartproia-web",
-        href: "https://github.com/Wenraymati/smartproia-web",
-        description: "Next.js · Vercel",
-      },
-      {
-        label: "gymbot",
-        href: "https://github.com/Wenraymati/gymbot",
-        description: "Bot GymBot Ludus",
-      },
-      {
-        label: "ruizruiz-bot",
-        href: "https://github.com/Wenraymati/ruizruiz-bot",
-        description: "Bot Ruiz & Ruiz",
-      },
-    ],
-  },
-  {
-    title: "Canales",
-    icon: "⊙",
+    title: "WhatsApp & Canales",
+    adminOnly: false,
     links: [
       {
         label: "WhatsApp Soporte",
         href: "https://wa.me/56962326907",
-        description: "+56 9 6232 6907",
+        description: "Linea de soporte directo SmartProIA",
       },
       {
         label: "Telegram VIP",
         href: "https://t.me/c/3809856981/1",
-        description: "Canal senales VIP",
+        description: "Canal de señales VIP (suscriptores)",
       },
     ],
   },
@@ -121,15 +133,13 @@ const categories: LinkCategory[] = [
 export default function LinksPage() {
   return (
     <div>
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Links Rapidos</h1>
+        <h1 className="text-2xl font-bold text-white">Links</h1>
         <p className="text-slate-500 text-sm mt-1">
           Accesos directos a paneles, servicios y herramientas
         </p>
       </div>
 
-      {/* Grid of categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {categories.map((category) => (
           <CategoryCard key={category.title} category={category} />
@@ -142,9 +152,18 @@ export default function LinksPage() {
 function CategoryCard({ category }: { category: LinkCategory }) {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-slate-400 text-base">{category.icon}</span>
-        <h2 className="text-white font-semibold text-sm">{category.title}</h2>
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <div>
+          <h2 className="text-white font-semibold text-sm">{category.title}</h2>
+          {category.subtitle && (
+            <p className="text-slate-600 text-xs mt-0.5">{category.subtitle}</p>
+          )}
+        </div>
+        {category.adminOnly && (
+          <span className="shrink-0 text-xs px-1.5 py-0.5 bg-slate-700 text-slate-400 rounded">
+            admin
+          </span>
+        )}
       </div>
       <ul className="space-y-0.5">
         {category.links.map((link) => (
@@ -159,11 +178,9 @@ function CategoryCard({ category }: { category: LinkCategory }) {
             >
               <span className="flex-1 min-w-0">
                 <span className="block truncate">{link.label}</span>
-                {link.description && (
-                  <span className="block text-xs text-slate-600 group-hover:text-slate-500 truncate mt-0.5">
-                    {link.description}
-                  </span>
-                )}
+                <span className="block text-xs text-slate-600 group-hover:text-slate-500 truncate mt-0.5">
+                  {link.description}
+                </span>
               </span>
               {link.requiresAuth && (
                 <span className="shrink-0 text-xs text-yellow-600 border border-yellow-700/40 bg-yellow-500/5 rounded px-1.5 py-0.5 font-medium">
