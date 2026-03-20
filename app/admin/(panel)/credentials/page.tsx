@@ -18,7 +18,7 @@ const SERVICES = [
     fields: [
       { label: "IP", key: "CRED_SSH_IP", type: "text" as FieldType },
       { label: "Usuario", key: "CRED_SSH_USER", type: "text" as FieldType },
-      { label: "Clave SSH path", key: "CRED_SSH_KEY_PATH", type: "text" as FieldType },
+      { label: "Key path", key: "CRED_SSH_KEY_PATH", type: "text" as FieldType },
     ],
   },
   {
@@ -37,6 +37,13 @@ const SERVICES = [
       { label: "URL", key: "CRED_UPTIME_URL", type: "url" as FieldType },
       { label: "Usuario", key: "CRED_UPTIME_USER", type: "text" as FieldType },
       { label: "Contrasena", key: "CRED_UPTIME_PASS", type: "password" as FieldType },
+    ],
+  },
+  {
+    name: "Panel Admin",
+    group: "Apps",
+    fields: [
+      { label: "Secret", key: "CRED_ADMIN_SECRET", type: "password" as FieldType },
     ],
   },
   {
@@ -63,6 +70,28 @@ const SERVICES = [
     fields: [
       { label: "REST URL", key: "CRED_UPSTASH_URL", type: "url" as FieldType },
       { label: "Token", key: "CRED_UPSTASH_TOKEN", type: "password" as FieldType },
+    ],
+  },
+  {
+    name: "Telegram",
+    group: "APIs",
+    fields: [
+      { label: "Bot Token", key: "CRED_TELEGRAM_TOKEN", type: "password" as FieldType },
+      { label: "Canal VIP ID", key: "CRED_TELEGRAM_CHANNEL", type: "text" as FieldType },
+    ],
+  },
+  {
+    name: "MercadoPago",
+    group: "APIs",
+    fields: [
+      { label: "Access Token", key: "CRED_MP_TOKEN", type: "password" as FieldType },
+    ],
+  },
+  {
+    name: "Resend",
+    group: "APIs",
+    fields: [
+      { label: "API Key", key: "CRED_RESEND_KEY", type: "password" as FieldType },
     ],
   },
 ] as const;
