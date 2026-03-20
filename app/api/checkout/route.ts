@@ -12,8 +12,16 @@ function getClient(test = false) {
 }
 
 const PLANS = {
-  basico: { title: "SmartProIA Básico", price: 14990, label: "Básico" },
-  pro:    { title: "SmartProIA PRO",    price: 24990, label: "PRO"    },
+  basico: {
+    title: "SmartProIA Básico",
+    price: parseInt(process.env.PRICE_BASIC_CLP ?? "14990", 10),
+    label: "Básico",
+  },
+  pro: {
+    title: "SmartProIA PRO",
+    price: parseInt(process.env.PRICE_PRO_CLP ?? "24990", 10),
+    label: "PRO",
+  },
 } as const;
 
 export async function GET(req: NextRequest) {
