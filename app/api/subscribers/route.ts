@@ -1,7 +1,19 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { Redis } from "@upstash/redis";
+
+function isValidAdminSecret(provided: string | null): boolean {
+  const expected = process.env.ADMIN_SECRET;
+  if (!expected || !provided) return false;
+  try {
+    const a = Buffer.from(provided, "utf8");
+    const b = Buffer.from(expected, "utf8");
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch { return false; }
+}
 
 function getRedis() {
   return new Redis({
@@ -11,9 +23,8 @@ function getRedis() {
 }
 
 export async function GET(req: NextRequest) {
-  const adminSecret = process.env.ADMIN_SECRET!;
   const auth = req.headers.get("x-admin-secret");
-  if (auth !== adminSecret) {
+  if (!isValidAdminSecret(auth)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

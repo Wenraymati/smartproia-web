@@ -19,8 +19,13 @@ const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 const MP_TEST_WEBHOOK_SECRET = process.env.MERCADOPAGO_TEST_WEBHOOK_SECRET;
 
 function checkSignature(req: NextRequest): boolean {
+  // Fail-closed: if no secrets are configured, reject all requests
+  if (!MP_WEBHOOK_SECRET && !MP_TEST_WEBHOOK_SECRET) {
+    console.error("[webhook] No webhook secrets configured — rejecting all requests");
+    return false;
+  }
   const xSignature = req.headers.get("x-signature");
-  if (!xSignature || (!MP_WEBHOOK_SECRET && !MP_TEST_WEBHOOK_SECRET)) return true;
+  if (!xSignature) return false;
   const xRequestId = req.headers.get("x-request-id");
   const dataId = new URL(req.url).searchParams.get("data.id");
   const parts = Object.fromEntries(xSignature.split(",").map(p => {
@@ -153,7 +158,7 @@ async function saveSubscriber(
 
 async function notifyAdmin(plan: string, email: string, amount: number, currency: string) {
   try {
-    const adminChatId = "1641358693";
+    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID || "1641358693";
     const msg = `🎉 *Nuevo suscriptor SmartProIA*\n\n📧 ${email}\n📦 Plan: *${plan}*\n💰 ${amount} ${currency.toUpperCase()}\n⏰ ${new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })}`;
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",

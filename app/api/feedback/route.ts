@@ -3,9 +3,12 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const { interests } = await req.json();
-    if (!Array.isArray(interests) || !interests.length) {
-      return NextResponse.json({ error: 'No interests provided' }, { status: 400 });
+    if (!Array.isArray(interests) || !interests.length || interests.length > 20) {
+      return NextResponse.json({ error: 'Invalid interests' }, { status: 400 });
     }
+    const sanitizedInterests = interests
+      .filter((i): i is string => typeof i === "string")
+      .map(i => i.slice(0, 100));
 
     // Send notification via Resend to admin email
     const key = process.env.RESEND_API_KEY;
@@ -19,12 +22,12 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: 'SmartProIA Feedback <hola@smartproia.com>',
           to: ['hola@smartproia.com'],
-          subject: `📊 Nuevo feedback: ${interests.slice(0, 2).join(', ')}`,
+          subject: `📊 Nuevo feedback: ${sanitizedInterests.slice(0, 2).join(', ')}`,
           html: `
             <h2 style="color:#22d3ee">Feedback SmartProIA</h2>
             <p>Un visitante indicó lo que le interesa:</p>
             <ul>
-              ${interests.map((i: string) => `<li>${i}</li>`).join('')}
+              ${sanitizedInterests.map((i: string) => `<li>${i}</li>`).join('')}
             </ul>
             <p style="color:#64748b;font-size:12px">smartproia.com</p>
           `,

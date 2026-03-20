@@ -1,10 +1,22 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import { timingSafeEqual } from "crypto";
 import { Redis } from "@upstash/redis";
 
+function isValidAdminSecret(provided: string | undefined): boolean {
+  const expected = process.env.ADMIN_SECRET;
+  if (!expected || !provided) return false;
+  try {
+    const a = Buffer.from(provided, "utf8");
+    const b = Buffer.from(expected, "utf8");
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch { return false; }
+}
+
 async function getData(secret: string | undefined) {
-  if (!secret || secret !== process.env.ADMIN_SECRET) return null;
+  if (!isValidAdminSecret(secret)) return null;
 
   const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,

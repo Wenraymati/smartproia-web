@@ -18,7 +18,8 @@ const PLANS = {
 
 export async function GET(req: NextRequest) {
   const plan = req.nextUrl.searchParams.get("plan") as keyof typeof PLANS | null;
-  const isTest = req.nextUrl.searchParams.get("test") === "true";
+  const isTest = process.env.NODE_ENV !== "production" &&
+               req.nextUrl.searchParams.get("test") === "true";
 
   if (!plan || !PLANS[plan]) {
     return NextResponse.json({ error: "Plan inválido" }, { status: 400 });

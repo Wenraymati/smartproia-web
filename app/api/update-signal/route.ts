@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { Redis } from "@upstash/redis";
+
+function isValidAdminSecret(provided: string | null): boolean {
+  const expected = process.env.ADMIN_SECRET;
+  if (!expected || !provided) return false;
+  try {
+    const a = Buffer.from(provided, "utf8");
+    const b = Buffer.from(expected, "utf8");
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch { return false; }
+}
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +40,7 @@ export interface SignalData {
 export async function POST(req: NextRequest) {
   // Auth via ADMIN_SECRET header or query param
   const authHeader = req.headers.get("x-admin-secret");
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected || authHeader !== expected) {
+  if (!isValidAdminSecret(authHeader)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
