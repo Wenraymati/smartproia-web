@@ -12,6 +12,7 @@ import {
 } from "@/lib/bot-client";
 import { StatCard } from "../components/StatCard";
 import { StatusDot } from "../components/StatusDot";
+import { TestSignalButton } from "../components/TestSignalButton";
 
 interface Subscriber {
   email: string;
@@ -116,6 +117,29 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
+      {/* Acciones Rapidas section */}
+      <section className="mb-10">
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          Acciones Rapidas
+        </h2>
+        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <p className="text-white text-sm font-medium mb-0.5">
+                Pipeline de senales
+              </p>
+              <p className="text-slate-500 text-xs">
+                Escribe una senal de prueba en Redis para verificar el pipeline
+                LiveSignal
+              </p>
+            </div>
+            <div className="ml-auto">
+              <TestSignalButton />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bots section */}
       <section>
         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
@@ -188,7 +212,7 @@ function BotCard({
           />
         </div>
       ) : (
-        <p className="text-slate-600 text-xs mt-4">Métricas no disponibles</p>
+        <p className="text-slate-600 text-xs mt-4">Metricas no disponibles</p>
       )}
     </div>
   );

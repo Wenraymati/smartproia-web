@@ -9,6 +9,7 @@ import {
   type RuizRuizLead,
 } from "@/lib/bot-client";
 import { StatCard } from "../../components/StatCard";
+import { LeadStatusSelect } from "../../components/LeadStatusSelect";
 
 function formatUnixDate(ts: number | null | undefined): string {
   if (!ts) return "—";
@@ -151,7 +152,13 @@ export default async function BotsPage() {
                     <td className="py-3 px-4">
                       <TempBadge temperature={lead.temperature} />
                     </td>
-                    <Td dimmed>{lead.estado}</Td>
+                    <td className="py-3 px-4">
+                      <LeadStatusSelect
+                        bot="gymbot"
+                        id={lead.id}
+                        current={lead.estado}
+                      />
+                    </td>
                     <Td dimmed>{formatUnixDate(lead.last_interaction)}</Td>
                     <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
                   </tr>
@@ -210,7 +217,11 @@ export default async function BotsPage() {
                     <Td dimmed>{lead.servicio ?? "—"}</Td>
                     <Td>{lead.score}</Td>
                     <td className="py-3 px-4">
-                      <EstadoBadge estado={lead.estado} />
+                      <LeadStatusSelect
+                        bot="ruizruiz"
+                        id={lead.id}
+                        current={lead.estado}
+                      />
                     </td>
                     <td className="py-3 px-4">
                       {lead.urgencia === 1 ? (
@@ -279,28 +290,6 @@ function Td({
   );
 }
 
-function EstadoBadge({ estado }: { estado: string }) {
-  const lower = estado.toLowerCase();
-  const colorClass =
-    lower === "nuevo"
-      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25"
-      : lower === "contactado"
-        ? "bg-blue-500/15 text-blue-400 border-blue-500/25"
-        : lower === "cerrado"
-          ? "bg-green-500/15 text-green-400 border-green-500/25"
-          : lower === "perdido"
-            ? "bg-red-500/15 text-red-400 border-red-500/25"
-            : "bg-slate-700 text-slate-400 border-slate-600";
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
-    >
-      {estado}
-    </span>
-  );
-}
-
 function UnavailableCard({
   name,
   className = "",
@@ -312,7 +301,7 @@ function UnavailableCard({
     <div
       className={`bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-5 flex items-center gap-3 ${className}`}
     >
-      <span className="text-yellow-400 text-lg">⚠</span>
+      <span className="text-yellow-400 text-lg">&#9888;</span>
       <div>
         <p className="text-yellow-400 font-medium text-sm">{name} no disponible</p>
         <p className="text-slate-500 text-xs mt-0.5">

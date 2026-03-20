@@ -4,6 +4,7 @@ interface LinkItem {
   label: string;
   href: string;
   description?: string;
+  requiresAuth?: boolean;
 }
 
 interface LinkCategory {
@@ -40,13 +41,15 @@ const categories: LinkCategory[] = [
     links: [
       {
         label: "GymBot — Railway",
-        href: "https://railway.app/project",
-        description: "Wenraymati/gymbot",
+        href: "https://railway.com/project",
+        description: "Wenraymati/gymbot · requiere auth",
+        requiresAuth: true,
       },
       {
         label: "Ruiz & Ruiz — Railway",
-        href: "https://railway.app/project",
-        description: "Wenraymati/ruizruiz-bot",
+        href: "https://railway.com/project",
+        description: "Wenraymati/ruizruiz-bot · requiere auth",
+        requiresAuth: true,
       },
     ],
   },
@@ -149,7 +152,9 @@ function CategoryCard({ category }: { category: LinkCategory }) {
             <a
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : undefined}
-              rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              rel={
+                link.href.startsWith("http") ? "noopener noreferrer" : undefined
+              }
               className="flex items-center gap-2 text-sm py-2 px-2 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 transition-colors group"
             >
               <span className="flex-1 min-w-0">
@@ -160,9 +165,14 @@ function CategoryCard({ category }: { category: LinkCategory }) {
                   </span>
                 )}
               </span>
+              {link.requiresAuth && (
+                <span className="shrink-0 text-xs text-yellow-600 border border-yellow-700/40 bg-yellow-500/5 rounded px-1.5 py-0.5 font-medium">
+                  auth
+                </span>
+              )}
               {link.href.startsWith("http") && (
                 <span className="shrink-0 text-slate-600 group-hover:text-cyan-500 transition-colors">
-                  ↗
+                  &#8599;
                 </span>
               )}
             </a>
