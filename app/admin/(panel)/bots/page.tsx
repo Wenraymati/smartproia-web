@@ -10,25 +10,45 @@ import {
 } from "@/lib/bot-client";
 import { StatCard } from "../../components/StatCard";
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-CL", {
+function formatUnixDate(ts: number | null | undefined): string {
+  if (!ts) return "—";
+  return new Date(ts * 1000).toLocaleDateString("es-CL", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 }
 
-const tempStyles: Record<GymBotLead["temperature"], string> = {
+type TempKey = "critical" | "hot" | "warm" | "cool" | "cold";
+
+const tempStyles: Record<TempKey, string> = {
+  critical: "bg-purple-500/15 text-purple-400 border border-purple-500/25",
   hot: "bg-red-500/15 text-red-400 border border-red-500/25",
   warm: "bg-yellow-500/15 text-yellow-400 border border-yellow-500/25",
+  cool: "bg-blue-500/15 text-blue-400 border border-blue-500/25",
   cold: "bg-slate-700 text-slate-400 border border-slate-600",
 };
 
-const tempLabels: Record<GymBotLead["temperature"], string> = {
+const tempLabels: Record<TempKey, string> = {
+  critical: "Critical",
   hot: "Hot",
   warm: "Warm",
+  cool: "Cool",
   cold: "Cold",
 };
+
+function TempBadge({ temperature }: { temperature: string }) {
+  const key = temperature.toLowerCase() as TempKey;
+  const style = tempStyles[key] ?? "bg-slate-700 text-slate-400 border border-slate-600";
+  const label = tempLabels[key] ?? temperature;
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}
+    >
+      {label}
+    </span>
+  );
+}
 
 export default async function BotsPage() {
   const [gymLeads, gymMetrics, ruizLeads, ruizStats] = await Promise.all([
@@ -52,29 +72,49 @@ export default async function BotsPage() {
       <section className="mb-12">
         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
           GymBot Ludus
+          {gymMetrics?.gym_name && (
+            <span className="ml-2 normal-case text-slate-600">
+              — {gymMetrics.gym_name}
+            </span>
+          )}
         </h2>
 
         {gymMetrics ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard
-              label="Total Leads"
-              value={gymMetrics.totalLeads}
+              label="Leads Hoy"
+              value={gymMetrics.today_leads}
               color="slate"
             />
             <StatCard
+              label="Critical"
+              value={gymMetrics.critical}
+              color="red"
+            />
+            <StatCard
               label="Hot"
-              value={gymMetrics.hotLeads}
+              value={gymMetrics.hot}
               color="red"
             />
             <StatCard
               label="Warm"
-              value={gymMetrics.warmLeads}
+              value={gymMetrics.warm}
               color="yellow"
             />
             <StatCard
+              label="Cool"
+              value={gymMetrics.cool}
+              color="cyan"
+            />
+            <StatCard
               label="Cold"
-              value={gymMetrics.coldLeads}
+              value={gymMetrics.cold}
               color="slate"
+            />
+            <StatCard
+              label="Conv %"
+              value={`${Math.round(gymMetrics.conversion_rate * 100)}%`}
+              color="cyan"
             />
           </div>
         ) : (
@@ -90,28 +130,30 @@ export default async function BotsPage() {
                 <tr className="border-b border-slate-700">
                   <Th>Teléfono</Th>
                   <Th>Nombre</Th>
+                  <Th>Plan</Th>
+                  <Th>Score</Th>
                   <Th>Temperatura</Th>
-                  <Th>Último mensaje</Th>
+                  <Th>Estado</Th>
+                  <Th>Última interacción</Th>
                   <Th>Fecha</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {gymLeads.map((lead) => (
+                {gymLeads.map((lead: GymBotLead) => (
                   <tr
                     key={lead.id}
                     className="hover:bg-slate-800/50 transition-colors"
                   >
-                    <Td mono>{lead.phone}</Td>
-                    <Td>{lead.name ?? "—"}</Td>
+                    <Td mono>{lead.telefono ?? "—"}</Td>
+                    <Td>{lead.nombre ?? "—"}</Td>
+                    <Td dimmed>{lead.plan_interes ?? "—"}</Td>
+                    <Td>{lead.score}</Td>
                     <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tempStyles[lead.temperature]}`}
-                      >
-                        {tempLabels[lead.temperature]}
-                      </span>
+                      <TempBadge temperature={lead.temperature} />
                     </td>
-                    <Td dimmed>{lead.lastMessage ?? "—"}</Td>
-                    <Td dimmed>{formatDate(lead.createdAt)}</Td>
+                    <Td dimmed>{lead.estado}</Td>
+                    <Td dimmed>{formatUnixDate(lead.last_interaction)}</Td>
+                    <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
                   </tr>
                 ))}
               </tbody>
@@ -130,19 +172,12 @@ export default async function BotsPage() {
 
         {ruizStats ? (
           <div className="flex flex-wrap gap-4 mb-6">
-            <StatCard
-              label="Total Leads"
-              value={ruizStats.totalLeads}
-              color="slate"
-            />
-            {Object.entries(ruizStats.byEstado).map(([estado, count]) => (
-              <StatCard
-                key={estado}
-                label={estado}
-                value={count}
-                color="cyan"
-              />
-            ))}
+            <StatCard label="Total" value={ruizStats.total} color="slate" />
+            <StatCard label="Nuevo" value={ruizStats.nuevo} color="cyan" />
+            <StatCard label="Contactado" value={ruizStats.contactado} color="cyan" />
+            <StatCard label="Cerrado" value={ruizStats.cerrado} color="cyan" />
+            <StatCard label="Urgentes" value={ruizStats.urgentes} color="red" />
+            <StatCard label="Hoy" value={ruizStats.hoy} color="yellow" />
           </div>
         ) : (
           <UnavailableCard name="Ruiz &amp; Ruiz" className="mb-6" />
@@ -157,24 +192,36 @@ export default async function BotsPage() {
                 <tr className="border-b border-slate-700">
                   <Th>Teléfono</Th>
                   <Th>Nombre</Th>
+                  <Th>Servicio</Th>
+                  <Th>Score</Th>
                   <Th>Estado</Th>
-                  <Th>Último mensaje</Th>
+                  <Th>Urgente</Th>
                   <Th>Fecha</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {ruizLeads.map((lead) => (
+                {ruizLeads.map((lead: RuizRuizLead) => (
                   <tr
                     key={lead.id}
                     className="hover:bg-slate-800/50 transition-colors"
                   >
-                    <Td mono>{lead.phone}</Td>
-                    <Td>{lead.name ?? "—"}</Td>
+                    <Td mono>{lead.telefono ?? "—"}</Td>
+                    <Td>{lead.nombre ?? "—"}</Td>
+                    <Td dimmed>{lead.servicio ?? "—"}</Td>
+                    <Td>{lead.score}</Td>
                     <td className="py-3 px-4">
                       <EstadoBadge estado={lead.estado} />
                     </td>
-                    <Td dimmed>{lead.lastMessage ?? "—"}</Td>
-                    <Td dimmed>{formatDate(lead.createdAt)}</Td>
+                    <td className="py-3 px-4">
+                      {lead.urgencia === 1 ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-500/15 text-red-400 border-red-500/25">
+                          Si
+                        </span>
+                      ) : (
+                        <span className="text-slate-600 text-xs">No</span>
+                      )}
+                    </td>
+                    <Td dimmed>{formatUnixDate(lead.created_at)}</Td>
                   </tr>
                 ))}
               </tbody>
@@ -239,7 +286,7 @@ function EstadoBadge({ estado }: { estado: string }) {
       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25"
       : lower === "contactado"
         ? "bg-blue-500/15 text-blue-400 border-blue-500/25"
-        : lower === "convertido"
+        : lower === "cerrado"
           ? "bg-green-500/15 text-green-400 border-green-500/25"
           : lower === "perdido"
             ? "bg-red-500/15 text-red-400 border-red-500/25"

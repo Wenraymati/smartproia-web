@@ -53,13 +53,6 @@ function botStatus(health: BotHealthResponse | null): "online" | "offline" {
   return health?.status === "ok" ? "online" : "offline";
 }
 
-function formatUptime(seconds: number | undefined): string {
-  if (!seconds) return "—";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
-}
-
 export default async function AdminDashboard() {
   const today = new Date().toLocaleDateString("es-CL", {
     weekday: "long",
@@ -133,8 +126,6 @@ export default async function AdminDashboard() {
           <BotCard
             name="GymBot Ludus"
             status={gymOnline}
-            uptime={gymHealth?.uptime}
-            version={gymHealth?.version}
             metrics={gymMetrics}
           />
 
@@ -142,8 +133,6 @@ export default async function AdminDashboard() {
           <RuizCard
             name="Ruiz & Ruiz"
             status={ruizOnline}
-            uptime={ruizHealth?.uptime}
-            version={ruizHealth?.version}
             stats={ruizStats}
           />
         </div>
@@ -155,14 +144,10 @@ export default async function AdminDashboard() {
 function BotCard({
   name,
   status,
-  uptime,
-  version,
   metrics,
 }: {
   name: string;
   status: "online" | "offline";
-  uptime?: number;
-  version?: string;
   metrics: GymBotMetrics | null;
 }) {
   return (
@@ -172,11 +157,9 @@ function BotCard({
           <StatusDot status={status} />
           <div>
             <p className="text-white font-semibold text-sm">{name}</p>
-            <p className="text-slate-500 text-xs">
-              {status === "online"
-                ? `Uptime ${formatUptime(uptime)}${version ? ` · v${version}` : ""}`
-                : "Sin respuesta"}
-            </p>
+            {metrics?.gym_name && (
+              <p className="text-slate-500 text-xs">{metrics.gym_name}</p>
+            )}
           </div>
         </div>
         <span
@@ -192,10 +175,17 @@ function BotCard({
 
       {metrics ? (
         <div className="grid grid-cols-4 gap-3 mt-4">
-          <MetricPill label="Total" value={metrics.totalLeads} color="slate" />
-          <MetricPill label="Hot" value={metrics.hotLeads} color="red" />
-          <MetricPill label="Warm" value={metrics.warmLeads} color="yellow" />
-          <MetricPill label="Cold" value={metrics.coldLeads} color="slate" />
+          <MetricPill label="Hoy" value={metrics.today_leads} color="slate" />
+          <MetricPill label="Critical" value={metrics.critical} color="red" />
+          <MetricPill label="Hot" value={metrics.hot} color="red" />
+          <MetricPill label="Warm" value={metrics.warm} color="yellow" />
+          <MetricPill label="Cool" value={metrics.cool} color="cyan" />
+          <MetricPill label="Cold" value={metrics.cold} color="slate" />
+          <MetricPill
+            label="Conv %"
+            value={Math.round(metrics.conversion_rate * 100)}
+            color="cyan"
+          />
         </div>
       ) : (
         <p className="text-slate-600 text-xs mt-4">Métricas no disponibles</p>
@@ -207,14 +197,10 @@ function BotCard({
 function RuizCard({
   name,
   status,
-  uptime,
-  version,
   stats,
 }: {
   name: string;
   status: "online" | "offline";
-  uptime?: number;
-  version?: string;
   stats: RuizRuizStats | null;
 }) {
   return (
@@ -225,9 +211,7 @@ function RuizCard({
           <div>
             <p className="text-white font-semibold text-sm">{name}</p>
             <p className="text-slate-500 text-xs">
-              {status === "online"
-                ? `Uptime ${formatUptime(uptime)}${version ? ` · v${version}` : ""}`
-                : "Sin respuesta"}
+              {status === "online" ? "Activo" : "Sin respuesta"}
             </p>
           </div>
         </div>
@@ -244,10 +228,12 @@ function RuizCard({
 
       {stats ? (
         <div className="flex flex-wrap gap-3 mt-4">
-          <MetricPill label="Total" value={stats.totalLeads} color="slate" />
-          {Object.entries(stats.byEstado).map(([estado, count]) => (
-            <MetricPill key={estado} label={estado} value={count} color="cyan" />
-          ))}
+          <MetricPill label="Total" value={stats.total} color="slate" />
+          <MetricPill label="Nuevo" value={stats.nuevo} color="cyan" />
+          <MetricPill label="Contactado" value={stats.contactado} color="cyan" />
+          <MetricPill label="Cerrado" value={stats.cerrado} color="cyan" />
+          <MetricPill label="Urgentes" value={stats.urgentes} color="red" />
+          <MetricPill label="Hoy" value={stats.hoy} color="yellow" />
         </div>
       ) : (
         <p className="text-slate-600 text-xs mt-4">Stats no disponibles</p>
