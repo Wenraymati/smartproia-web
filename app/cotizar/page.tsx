@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   MessageCircle,
@@ -18,6 +18,16 @@ import {
 /* ─── Constants ──────────────────────────────────────────────────────── */
 
 const WA_BASE = 'https://wa.me/56962326907';
+
+/* ─── Tracking ───────────────────────────────────────────────────────── */
+
+function track(event: string) {
+  fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event }),
+  }).catch(() => {/* fire-and-forget */});
+}
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -512,6 +522,15 @@ export default function CotizarPage() {
 
   const TOTAL_STEPS = 4;
 
+  useEffect(() => { track('cotizar:visit'); }, []);
+
+  const goToStep = useCallback((n: number) => {
+    setStep(n);
+    if (n === 2) track('cotizar:step2');
+    if (n === 3) track('cotizar:step3');
+    if (n === 4) track('cotizar:complete');
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased">
       <QuoteNav />
@@ -538,7 +557,7 @@ export default function CotizarPage() {
             <StepIndustry
               value={quote.industry}
               onChange={(v) => setQuote((q) => ({ ...q, industry: v }))}
-              onNext={() => setStep(2)}
+              onNext={() => goToStep(2)}
             />
           )}
 
@@ -546,8 +565,8 @@ export default function CotizarPage() {
             <StepVolume
               value={quote.volume}
               onChange={(v) => setQuote((q) => ({ ...q, volume: v }))}
-              onNext={() => setStep(3)}
-              onBack={() => setStep(1)}
+              onNext={() => goToStep(3)}
+              onBack={() => goToStep(1)}
             />
           )}
 
@@ -555,8 +574,8 @@ export default function CotizarPage() {
             <StepFeatures
               value={quote.features}
               onChange={(v) => setQuote((q) => ({ ...q, features: v }))}
-              onNext={() => setStep(4)}
-              onBack={() => setStep(2)}
+              onNext={() => goToStep(4)}
+              onBack={() => goToStep(2)}
             />
           )}
 
