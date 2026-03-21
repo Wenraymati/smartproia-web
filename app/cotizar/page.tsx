@@ -530,8 +530,30 @@ export default function CotizarPage() {
     setStep(n);
     if (n === 2) track('cotizar:step2');
     if (n === 3) track('cotizar:step3');
-    if (n === 4) track('cotizar:complete');
-  }, []);
+    if (n === 4) {
+      track('cotizar:complete');
+      /* Notify admin with full lead details */
+      const planKey = computePlan(quote.volume, quote.features.length);
+      const plan = PLAN_DATA[planKey];
+      const industryLabel = INDUSTRIES.find((i) => i.id === quote.industry)?.label ?? quote.industry;
+      const volumeLabel = VOLUME_OPTIONS.find((v) => v.id === quote.volume)?.label ?? quote.volume ?? '';
+      const featureLabels = FEATURE_OPTIONS
+        .filter((f) => quote.features.includes(f.id))
+        .map((f) => f.label);
+      fetch('/api/notify-cotizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          industry: industryLabel,
+          volume: volumeLabel,
+          features: featureLabels,
+          plan: plan.name,
+          setup: plan.setup,
+          monthly: plan.monthly,
+        }),
+      }).catch(() => {});
+    }
+  }, [quote]);
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased">

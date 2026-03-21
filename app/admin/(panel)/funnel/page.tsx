@@ -9,6 +9,7 @@ interface FunnelStep {
 }
 
 const LANDING_STEPS: FunnelStep[] = [
+  { key: "landing:visit",       label: "Visitas a landing",     icon: "🌐" },
   { key: "landing:cta_demo",    label: "Click demo WA (hero)",  icon: "🟢" },
   { key: "landing:cta_cotizar", label: "Click cotizar (hero)",  icon: "🔵" },
 ];

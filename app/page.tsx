@@ -125,6 +125,7 @@ export default function SmartProIA() {
       .then((r) => r.json())
       .then((d: PublicStats) => setStats(d))
       .catch(() => {});
+    track('landing:visit');
   }, []);
 
   return (
