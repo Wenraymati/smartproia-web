@@ -4,14 +4,15 @@ import { type NextRequest } from "next/server";
 import { getRedis } from "@/lib/redis";
 
 const ALLOWED_EVENTS = new Set([
+  "landing:visit",
+  "landing:cta_demo",
+  "landing:cta_cotizar",
   "cotizar:visit",
   "cotizar:step2",
   "cotizar:step3",
   "cotizar:complete",
   "cotizar:cta_wa",
   "cotizar:cta_mp",
-  "landing:cta_demo",
-  "landing:cta_cotizar",
 ]);
 
 export async function POST(req: NextRequest) {

@@ -30,12 +30,13 @@ export default async function AdminDashboard() {
   const redis = getRedis();
   const todayKey = new Date().toISOString().slice(0, 10);
 
-  const [gymHealth, ruizHealth, gymMetrics, ruizStats, demoClicks, cotizarVisits, waContacts] =
+  const [gymHealth, ruizHealth, gymMetrics, ruizStats, landingVisits, demoClicks, cotizarVisits, waContacts] =
     await Promise.all([
       getGymBotHealth(),
       getRuizRuizHealth(),
       getGymBotMetrics(),
       getRuizRuizStats(),
+      redis.get<number>(`track:landing:visit:${todayKey}`),
       redis.get<number>(`track:landing:cta_demo:${todayKey}`),
       redis.get<number>(`track:cotizar:visit:${todayKey}`),
       redis.get<number>(`track:cotizar:cta_wa:${todayKey}`),
@@ -65,10 +66,11 @@ export default async function AdminDashboard() {
             Ver completo →
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           {[
+            { label: "Visitas", value: landingVisits ?? 0, color: "text-slate-300" },
             { label: "Demo WA", value: demoClicks ?? 0, color: "text-green-400" },
-            { label: "Cotizar", value: cotizarVisits ?? 0, color: "text-blue-400" },
+            { label: "Cotizaron", value: cotizarVisits ?? 0, color: "text-blue-400" },
             { label: "WA contactos", value: waContacts ?? 0, color: "text-yellow-400" },
           ].map((s) => (
             <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
