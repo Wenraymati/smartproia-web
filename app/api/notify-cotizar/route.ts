@@ -8,6 +8,8 @@ const TG_CHAT = process.env.TELEGRAM_ADMIN_CHAT_ID ?? process.env.TELEGRAM_CHANN
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
 
 interface CotizarLeadBody {
+  name?: string;
+  phone?: string;
   industry: string;
   volume: string;
   features: string[];
@@ -37,11 +39,13 @@ async function sendEmail(lead: CotizarLeadBody, id: string) {
     body: JSON.stringify({
       from: "SmartProIA <hola@smartproia.com>",
       to: ["hola@smartproia.com"],
-      subject: `🤖 Nuevo prospecto cotizó — Plan ${lead.plan}`,
+      subject: `🤖 ${lead.name ? lead.name + ' cotizó' : 'Nuevo prospecto cotizó'} — Plan ${lead.plan}`,
       html: `
         <h2>Nuevo prospecto completó el cotizador</h2>
         <table cellpadding="8" style="border-collapse:collapse;width:100%;max-width:500px">
           <tr><td><strong>ID</strong></td><td>${id}</td></tr>
+          ${lead.name ? `<tr><td><strong>Nombre</strong></td><td>${lead.name}</td></tr>` : ''}
+          ${lead.phone ? `<tr><td><strong>Teléfono/WA</strong></td><td><a href="https://wa.me/${lead.phone.replace(/\D/g, '')}">${lead.phone}</a></td></tr>` : ''}
           <tr><td><strong>Rubro</strong></td><td>${lead.industry}</td></tr>
           <tr><td><strong>Volumen</strong></td><td>${lead.volume}</td></tr>
           <tr><td><strong>Funciones</strong></td><td>${lead.features.join(", ") || "—"}</td></tr>
@@ -80,11 +84,15 @@ export async function POST(req: NextRequest) {
   /* Notify in parallel — fire-and-forget */
   const tgMsg =
     `🎯 <b>Nuevo prospecto en cotizador</b>\n\n` +
+    (body.name ? `<b>Nombre:</b> ${body.name}\n` : '') +
+    (body.phone ? `<b>Teléfono:</b> ${body.phone}\n` : '') +
     `<b>Rubro:</b> ${industry}\n` +
     `<b>Volumen:</b> ${volume}\n` +
     `<b>Funciones:</b> ${features.join(", ") || "—"}\n` +
     `<b>Plan:</b> ${plan} (${setup} + ${monthly}/mes)\n\n` +
-    `Respondé rápido en <a href="https://wa.me/56962326907">WhatsApp</a>`;
+    (body.phone
+      ? `Contactar: <a href="https://wa.me/${body.phone.replace(/\D/g, '')}">WhatsApp</a>`
+      : `Respondé rápido en <a href="https://wa.me/56962326907">WhatsApp</a>`);
 
   await Promise.all([
     sendTelegram(tgMsg),

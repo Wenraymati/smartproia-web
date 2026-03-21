@@ -4,6 +4,8 @@ import { getRedis } from "@/lib/redis";
 
 interface CotizarLead {
   id: string;
+  name?: string;
+  phone?: string;
   industry: string;
   volume: string;
   features: string[];
@@ -104,12 +106,32 @@ export default async function CotizarLeadsPage() {
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>
                         {lead.plan}
                       </span>
-                      <span className="text-white font-medium text-sm">{lead.industry}</span>
+                      {lead.name ? (
+                        <span className="text-white font-medium text-sm">{lead.name}</span>
+                      ) : (
+                        <span className="text-white font-medium text-sm">{lead.industry}</span>
+                      )}
+                      {lead.phone && (
+                        <a
+                          href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-400 hover:text-green-300 text-xs transition-colors"
+                        >
+                          {lead.phone} ↗
+                        </a>
+                      )}
                     </div>
                     <span className="text-slate-600 text-xs shrink-0">{timeAgo(lead.createdAt)}</span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    {lead.name && (
+                      <div>
+                        <p className="text-slate-600 mb-0.5">Rubro</p>
+                        <p className="text-slate-300">{lead.industry}</p>
+                      </div>
+                    )}
                     <div>
                       <p className="text-slate-600 mb-0.5">Volumen</p>
                       <p className="text-slate-300">{VOLUME_LABELS[lead.volume] ?? lead.volume}</p>

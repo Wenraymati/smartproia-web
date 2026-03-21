@@ -34,10 +34,16 @@ function track(event: string) {
 type Volume = 'low' | 'mid' | 'high';
 type PlanKey = 'basic' | 'standard' | 'premium';
 
+interface ContactInfo {
+  name: string;
+  phone: string;
+}
+
 interface QuoteState {
   industry: string;
   volume: Volume | null;
   features: string[];
+  contact: ContactInfo;
 }
 
 /* ─── Data ───────────────────────────────────────────────────────────── */
@@ -386,7 +392,80 @@ function StepFeatures({
   );
 }
 
-/* ─── Step 4: Result ─────────────────────────────────────────────────── */
+/* ─── Step 4: Contact ────────────────────────────────────────────────── */
+
+function StepContact({
+  value,
+  onChange,
+  onNext,
+  onBack,
+}: {
+  value: ContactInfo;
+  onChange: (v: ContactInfo) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const isValid = value.name.trim().length >= 2 && value.phone.trim().length >= 8;
+
+  return (
+    <div>
+      <h2 className="text-2xl font-black text-white mb-2">
+        ¿A dónde te enviamos la cotización?
+      </h2>
+      <p className="text-slate-400 text-sm mb-8">
+        Te la mandamos por WhatsApp en segundos, con los detalles de tu plan.
+      </p>
+
+      <div className="space-y-4 mb-8">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Tu nombre <span className="text-green-400">*</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: Martín López"
+            value={value.name}
+            onChange={(e) => onChange({ ...value, name: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-slate-600 text-sm transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            WhatsApp / Teléfono <span className="text-green-400">*</span>
+          </label>
+          <input
+            type="tel"
+            placeholder="Ej: +56912345678"
+            value={value.phone}
+            onChange={(e) => onChange({ ...value, phone: e.target.value })}
+            className="w-full bg-slate-800 border border-slate-700 focus:border-green-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-slate-600 text-sm transition-colors"
+          />
+          <p className="text-slate-600 text-xs mt-1.5">
+            Solo te contactamos con tu cotización. Sin spam.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-5 py-3.5 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 rounded-xl transition-all text-sm font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" /> Atrás
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!isValid}
+          className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl py-3.5 transition-all"
+        >
+          Ver mi cotización <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 5: Result ─────────────────────────────────────────────────── */
 
 function StepResult({
   quote,
@@ -404,9 +483,9 @@ function StepResult({
     .filter((f) => quote.features.includes(f.id))
     .map((f) => f.label);
 
-  // Build WA pre-filled text
+  // Build WA pre-filled text including contact name
   const waText = encodeURIComponent(
-    `Hola, acabo de cotizar en smartproia.com y me recomendaron el plan ${plan.name} (${plan.setup} setup + ${plan.monthly}/mes).\n\nRubro: ${industryLabel}\nVolumen: ${volumeLabel}\nFunciones: ${featureLabels.join(', ') || 'No seleccionadas'}\n\n¿Podemos avanzar?`
+    `Hola, soy ${quote.contact.name}. Acabo de cotizar en smartproia.com y me recomendaron el plan ${plan.name} (${plan.setup} setup + ${plan.monthly}/mes).\n\nRubro: ${industryLabel}\nVolumen: ${volumeLabel}\nFunciones: ${featureLabels.join(', ') || 'No seleccionadas'}\n\n¿Podemos avanzar?`
   );
 
   // Primary checkout URL
@@ -418,6 +497,11 @@ function StepResult({
 
   return (
     <div>
+      {quote.contact.name && (
+        <p className="text-green-400 text-sm font-medium mb-4">
+          ¡Listo, {quote.contact.name.split(' ')[0]}! Esta es tu cotización:
+        </p>
+      )}
       <div className="mb-6 flex items-center gap-3">
         {plan.highlight && (
           <span className="bg-green-500 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wide">
@@ -469,6 +553,9 @@ function StepResult({
 
       {/* Summary of answers */}
       <div className="bg-slate-800/30 border border-slate-800 rounded-xl p-4 mb-8 text-xs text-slate-500 space-y-1.5">
+        {quote.contact.name && (
+          <p><span className="text-slate-400 font-medium">Nombre:</span> {quote.contact.name}</p>
+        )}
         <p><span className="text-slate-400 font-medium">Rubro:</span> {industryLabel}</p>
         <p><span className="text-slate-400 font-medium">Volumen:</span> {volumeLabel}</p>
         {featureLabels.length > 0 && (
@@ -520,9 +607,10 @@ export default function CotizarPage() {
     industry: '',
     volume: null,
     features: [],
+    contact: { name: '', phone: '' },
   });
 
-  const TOTAL_STEPS = 4;
+  const TOTAL_STEPS = 5;
 
   useEffect(() => { track('cotizar:visit'); }, []);
 
@@ -530,9 +618,9 @@ export default function CotizarPage() {
     setStep(n);
     if (n === 2) track('cotizar:step2');
     if (n === 3) track('cotizar:step3');
-    if (n === 4) {
+    if (n === 5) {
       track('cotizar:complete');
-      /* Notify admin with full lead details */
+      /* Notify admin with full lead details including contact info */
       const planKey = computePlan(quote.volume, quote.features.length);
       const plan = PLAN_DATA[planKey];
       const industryLabel = INDUSTRIES.find((i) => i.id === quote.industry)?.label ?? quote.industry;
@@ -544,6 +632,8 @@ export default function CotizarPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: quote.contact.name,
+          phone: quote.contact.phone,
           industry: industryLabel,
           volume: volumeLabel,
           features: featureLabels,
@@ -569,7 +659,7 @@ export default function CotizarPage() {
             Tu cotización en 2 minutos
           </h1>
           <p className="text-slate-400 text-sm mt-2">
-            Respondé 3 preguntas y te recomendamos el plan ideal.
+            Respondé {TOTAL_STEPS - 1} preguntas y te recomendamos el plan ideal.
           </p>
         </div>
 
@@ -604,15 +694,24 @@ export default function CotizarPage() {
           )}
 
           {step === 4 && (
+            <StepContact
+              value={quote.contact}
+              onChange={(v) => setQuote((q) => ({ ...q, contact: v }))}
+              onNext={() => goToStep(5)}
+              onBack={() => goToStep(3)}
+            />
+          )}
+
+          {step === 5 && (
             <StepResult
               quote={quote}
-              onBack={() => setStep(3)}
+              onBack={() => setStep(4)}
             />
           )}
         </div>
 
         {/* Trust signals */}
-        {step < 4 && (
+        {step < 5 && (
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8 text-xs text-slate-600">
             {['Sin compromiso', 'Respuesta en menos de 2 horas', 'Sin tarjeta de crédito'].map((t) => (
               <span key={t} className="flex items-center gap-1.5">
