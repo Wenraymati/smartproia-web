@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/vault", label: "Accesos", icon: "⊛" },
   { href: "/admin/credentials", label: "Credenciales", icon: "🔐" },
   { href: "/admin/links", label: "Links", icon: "⊞" },
+  { href: "/admin/cron", label: "Cron Jobs", icon: "⏱" },
   { href: "/admin/audit", label: "Auditoría", icon: "📋" },
 ];
 
