@@ -9,6 +9,8 @@ import {
   type GymBotMetrics,
   type RuizRuizStats,
 } from "@/lib/bot-client";
+import Link from "next/link";
+import { getRedis } from "@/lib/redis";
 import { StatusDot } from "../components/StatusDot";
 import { TestSignalButton } from "../components/TestSignalButton";
 import { WaReconnectBanner } from "../components/WaReconnectBanner";
@@ -25,12 +27,19 @@ export default async function AdminDashboard() {
     day: "numeric",
   });
 
-  const [gymHealth, ruizHealth, gymMetrics, ruizStats] = await Promise.all([
-    getGymBotHealth(),
-    getRuizRuizHealth(),
-    getGymBotMetrics(),
-    getRuizRuizStats(),
-  ]);
+  const redis = getRedis();
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  const [gymHealth, ruizHealth, gymMetrics, ruizStats, demoClicks, cotizarVisits, waContacts] =
+    await Promise.all([
+      getGymBotHealth(),
+      getRuizRuizHealth(),
+      getGymBotMetrics(),
+      getRuizRuizStats(),
+      redis.get<number>(`track:landing:cta_demo:${todayKey}`),
+      redis.get<number>(`track:cotizar:visit:${todayKey}`),
+      redis.get<number>(`track:cotizar:cta_wa:${todayKey}`),
+    ]);
 
   const gymOnline = botStatus(gymHealth);
   const ruizOnline = botStatus(ruizHealth);
@@ -46,10 +55,29 @@ export default async function AdminDashboard() {
       {/* WhatsApp reconnect alert banner */}
       <WaReconnectBanner />
 
-      {/* SmartProIA subscriptions — disabled */}
-      <div className="mb-8 text-slate-500 text-sm">
-        Módulo de suscripciones desactivado — datos en construcción
-      </div>
+      {/* Funnel hoy */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+            Funnel hoy
+          </h2>
+          <Link href="/admin/funnel" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+            Ver completo →
+          </Link>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Demo WA", value: demoClicks ?? 0, color: "text-green-400" },
+            { label: "Cotizar", value: cotizarVisits ?? 0, color: "text-blue-400" },
+            { label: "WA contactos", value: waContacts ?? 0, color: "text-yellow-400" },
+          ].map((s) => (
+            <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+              <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
+              <p className="text-slate-500 text-xs mt-1">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Acciones Rapidas section */}
       <section className="mb-10">
