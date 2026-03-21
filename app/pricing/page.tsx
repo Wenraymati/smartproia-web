@@ -1,83 +1,25 @@
 import Link from "next/link";
-import { CheckCircle2, X, MessageCircle } from "lucide-react";
+import { CheckCircle2, MessageCircle, ArrowRight } from "lucide-react";
 import { Badge } from "../components/Badge";
 
 export const metadata = {
   title: "Precios — SmartProIA Bots WhatsApp",
   description:
-    "Planes claros para automatizar WhatsApp en tu negocio. Setup único + mantenimiento mensual. Sin contratos de permanencia.",
+    "Plan claro para automatizar WhatsApp en tu negocio. $499 setup + $99/mes. Sin contratos de permanencia.",
 };
 
 const WA_CONTACT =
   "https://wa.me/56962326907?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20planes";
 
-const plans = [
-  {
-    name: "Basic",
-    setup: "$250",
-    monthly: "$60",
-    tagline: "Para negocios que están comenzando a automatizar",
-    highlight: false,
-    features: [
-      "Hasta 500 mensajes/mes",
-      "1 número WhatsApp Business",
-      "Hasta 5 flujos de conversación",
-      "Dashboard Chatwoot para tu equipo",
-      "Reporte mensual de conversaciones",
-      "Soporte por email",
-      "Setup en 7 días hábiles",
-    ],
-    cta: "Empezar con Basic",
-  },
-  {
-    name: "Standard",
-    setup: "$350",
-    monthly: "$90",
-    tagline: "El más elegido por negocios con flujo constante de consultas",
-    highlight: true,
-    features: [
-      "Mensajes ilimitados",
-      "1 número WhatsApp Business",
-      "Flujos ilimitados",
-      "Dashboard Chatwoot + múltiples agentes",
-      "Reporte semanal detallado",
-      "Soporte por WhatsApp",
-      "Ajustes mensuales incluidos",
-      "Setup en 7 días hábiles",
-    ],
-    cta: "Empezar con Standard",
-  },
-  {
-    name: "Premium",
-    setup: "$500",
-    monthly: "$150",
-    tagline: "Para empresas con operación compleja o múltiples sucursales",
-    highlight: false,
-    features: [
-      "Todo lo de Standard",
-      "Múltiples números WhatsApp",
-      "Bot multiagente con escalado",
-      "Integraciones con CRM o sistemas propios",
-      "Gestor dedicado de cuenta",
-      "Reportes personalizados",
-      "SLA de respuesta prioritario",
-      "Setup en 5 días hábiles",
-    ],
-    cta: "Empezar con Premium",
-  },
-];
-
-const featureRows = [
-  { label: "Mensajes/mes", basic: "Hasta 500", standard: "Ilimitados", premium: "Ilimitados" },
-  { label: "Números WhatsApp", basic: "1", standard: "1", premium: "Múltiples" },
-  { label: "Flujos de conversación", basic: "Hasta 5", standard: "Ilimitados", premium: "Ilimitados" },
-  { label: "Dashboard Chatwoot", basic: true, standard: true, premium: true },
-  { label: "Reportes", basic: "Mensual", standard: "Semanal", premium: "Personalizado" },
-  { label: "Soporte", basic: "Email", standard: "WhatsApp", premium: "Prioritario + gestor" },
-  { label: "Integraciones CRM", basic: false, standard: false, premium: true },
-  { label: "Bot multiagente", basic: false, standard: false, premium: true },
-  { label: "Ajustes mensuales", basic: false, standard: true, premium: true },
-  { label: "Setup en días hábiles", basic: "7 días", standard: "7 días", premium: "5 días" },
+const PLAN_FEATURES = [
+  "24/7 atención automática",
+  "IA con contexto de tu negocio",
+  "Calificación de leads automática",
+  "Dashboard Chatwoot incluido",
+  "Alertas para casos urgentes",
+  "Sin límite de conversaciones",
+  "Setup en 7 días",
+  "1er mes gratis",
 ];
 
 const pricingFaqs = [
@@ -90,10 +32,6 @@ const pricingFaqs = [
     a: "Puedes cancelar con 30 días de aviso. El bot permanece activo hasta el fin del período pagado. Sin penalizaciones ni permanencia mínima.",
   },
   {
-    q: "¿Puedo cambiar de plan?",
-    a: "Sí, en cualquier momento. El cambio aplica al próximo período de facturación. Si subís de plan, la diferencia se prorratea.",
-  },
-  {
     q: "¿Los precios son en USD o en pesos?",
     a: "Los precios están en USD. Podemos cotizar en pesos chilenos o argentinos según el caso. Consulta por WhatsApp.",
   },
@@ -101,18 +39,11 @@ const pricingFaqs = [
     q: "¿Hay prueba gratuita?",
     a: "No ofrecemos trial, pero sí una demo gratuita de 30 minutos donde te mostramos el bot funcionando con un ejemplo real para tu negocio. Sin compromiso.",
   },
+  {
+    q: "¿Qué incluye el primer mes gratis?",
+    a: "Al contratar, el primer mes de mantenimiento no se cobra. Solo pagas el setup inicial de $499 USD y arrancás.",
+  },
 ];
-
-function CheckOrX({ value }: { value: boolean | string }) {
-  if (typeof value === "string") {
-    return <span className="text-sm text-slate-300">{value}</span>;
-  }
-  return value ? (
-    <CheckCircle2 className="w-4 h-4 text-green-400 mx-auto" />
-  ) : (
-    <X className="w-4 h-4 text-slate-700 mx-auto" />
-  );
-}
 
 export default function PricingPage() {
   return (
@@ -132,10 +63,10 @@ export default function PricingPage() {
         </a>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-20">
+      <main className="max-w-3xl mx-auto px-6 py-20">
         {/* Header */}
         <div className="text-center mb-16">
-          <Badge>Planes y precios</Badge>
+          <Badge>Plan y precio</Badge>
           <h1 className="text-5xl font-black text-white mt-6 mb-4">
             Inversión clara.
             <br />
@@ -149,132 +80,63 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Pricing cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-20">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl p-8 flex flex-col ${
-                plan.highlight
-                  ? "bg-gradient-to-b from-green-950/40 to-slate-900 border-2 border-green-500/50 shadow-xl shadow-green-500/10"
-                  : "bg-slate-900/60 border border-slate-800"
-              }`}
-            >
-              {plan.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="bg-green-500 text-slate-950 text-xs font-black px-4 py-1 rounded-full uppercase tracking-wide">
-                    Más popular
-                  </span>
-                </div>
-              )}
+        {/* Single pricing card */}
+        <div className="relative bg-gradient-to-b from-green-950/40 to-slate-900 border-2 border-green-500/50 rounded-2xl p-10 shadow-xl shadow-green-500/10 mb-20">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+            <span className="bg-green-500 text-slate-950 text-xs font-black px-4 py-1 rounded-full uppercase tracking-wide">
+              1er mes gratis
+            </span>
+          </div>
 
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-white mb-1">{plan.name}</h2>
-                <p className="text-slate-500 text-xs mb-4 leading-relaxed">
-                  {plan.tagline}
-                </p>
-                <div className="space-y-1">
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      className={`text-3xl font-black ${plan.highlight ? "text-green-400" : "text-white"}`}
-                    >
-                      {plan.setup}
-                    </span>
-                    <span className="text-slate-500 text-sm">setup único</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-slate-300">
-                      {plan.monthly}
-                    </span>
-                    <span className="text-slate-500 text-sm">/mes</span>
-                  </div>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
+            {/* Left: name + price */}
+            <div className="flex-1">
+              <h2 className="text-2xl font-black text-green-400 mb-2">Bot WhatsApp IA</h2>
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed max-w-sm">
+                Todo lo que necesitás para automatizar la atención de tu negocio desde el día uno.
+              </p>
+
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="text-5xl font-black text-white">$499</span>
+                <span className="text-slate-400 text-sm">USD setup único</span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-8">
+                <span className="text-3xl font-bold text-green-400">$99</span>
+                <span className="text-slate-500 text-sm">USD/mes</span>
               </div>
 
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2.5 text-sm text-slate-400"
-                  >
-                    <CheckCircle2
-                      className={`w-4 h-4 shrink-0 mt-0.5 ${plan.highlight ? "text-green-400" : "text-slate-600"}`}
-                    />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href={WA_CONTACT}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex items-center justify-center gap-2 font-bold rounded-xl px-6 py-3 transition-all text-sm ${
-                  plan.highlight
-                    ? "bg-green-500 hover:bg-green-400 text-slate-950 shadow-lg shadow-green-500/20"
-                    : "border border-slate-700 text-slate-300 hover:border-green-500 hover:text-green-400 bg-transparent"
-                }`}
-              >
-                <MessageCircle className="w-4 h-4" />
-                {plan.cta}
-              </a>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/cotizar"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl px-6 py-3 transition-all shadow-lg shadow-green-500/20 text-sm"
+                >
+                  <ArrowRight className="w-4 h-4" /> Cotizar ahora
+                </Link>
+                <a
+                  href={WA_CONTACT}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 border border-slate-700 text-slate-300 hover:border-green-500 hover:text-green-400 font-semibold rounded-xl px-6 py-3 transition-all text-sm"
+                >
+                  <MessageCircle className="w-4 h-4" /> Hablar por WhatsApp
+                </a>
+              </div>
             </div>
-          ))}
-        </div>
 
-        {/* Feature comparison table */}
-        <div className="mb-20">
-          <h2 className="text-2xl font-black text-white text-center mb-8">
-            Comparación de planes
-          </h2>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800 bg-slate-800/30">
-                    <th className="text-left py-4 px-6 text-slate-400 font-medium text-xs uppercase tracking-wider w-1/2">
-                      Característica
-                    </th>
-                    {plans.map((plan) => (
-                      <th
-                        key={plan.name}
-                        className={`py-4 px-4 text-center text-xs font-bold uppercase tracking-wider ${
-                          plan.highlight ? "text-green-400" : "text-slate-400"
-                        }`}
-                      >
-                        {plan.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {featureRows.map((row, i) => (
-                    <tr
-                      key={i}
-                      className="hover:bg-slate-800/30 transition-colors"
-                    >
-                      <td className="py-3 px-6 text-slate-300 text-sm">
-                        {row.label}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <CheckOrX value={row.basic} />
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <CheckOrX value={row.standard} />
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <CheckOrX value={row.premium} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {/* Right: features */}
+            <ul className="space-y-3 sm:min-w-[220px]">
+              {PLAN_FEATURES.map((f, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-green-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* FAQ */}
-        <div className="max-w-2xl mx-auto mb-20">
+        <div className="mb-20">
           <h2 className="text-2xl font-black text-white text-center mb-8">
             Preguntas frecuentes
           </h2>
