@@ -8,6 +8,7 @@ const navItems = [
   { href: "/admin/empresas", label: "Empresas", icon: "◫" },
   { href: "/admin/bots", label: "Leads", icon: "◎" },
   { href: "/admin/funnel", label: "Funnel", icon: "📊" },
+  { href: "/admin/cotizar-leads", label: "Cotizar Leads", icon: "🎯" },
   { href: "/admin/infra", label: "Infra", icon: "⬡" },
   { href: "/admin/qr", label: "QR WhatsApp", icon: "▣" },
   { href: "/admin/vault", label: "Accesos", icon: "⊛" },

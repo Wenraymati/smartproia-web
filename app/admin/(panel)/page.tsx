@@ -30,7 +30,7 @@ export default async function AdminDashboard() {
   const redis = getRedis();
   const todayKey = new Date().toISOString().slice(0, 10);
 
-  const [gymHealth, ruizHealth, gymMetrics, ruizStats, landingVisits, demoClicks, cotizarVisits, waContacts] =
+  const [gymHealth, ruizHealth, gymMetrics, ruizStats, landingVisits, demoClicks, cotizarVisits, waContacts, totalCotizarLeads] =
     await Promise.all([
       getGymBotHealth(),
       getRuizRuizHealth(),
@@ -40,6 +40,7 @@ export default async function AdminDashboard() {
       redis.get<number>(`track:landing:cta_demo:${todayKey}`),
       redis.get<number>(`track:cotizar:visit:${todayKey}`),
       redis.get<number>(`track:cotizar:cta_wa:${todayKey}`),
+      redis.llen("cotizar:leads"),
     ]);
 
   const gymOnline = botStatus(gymHealth);
@@ -79,6 +80,27 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Cotizar Leads */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+            Leads cotizador
+          </h2>
+          <Link href="/admin/cotizar-leads" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+            Ver todos →
+          </Link>
+        </div>
+        <Link href="/admin/cotizar-leads" className="block bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-5 transition-colors group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-black text-green-400">{totalCotizarLeads ?? 0}</p>
+              <p className="text-slate-500 text-sm mt-1">Prospectos que cotizaron</p>
+            </div>
+            <span className="text-slate-600 group-hover:text-slate-400 transition-colors text-2xl">🎯</span>
+          </div>
+        </Link>
       </section>
 
       {/* Acciones Rapidas section */}
