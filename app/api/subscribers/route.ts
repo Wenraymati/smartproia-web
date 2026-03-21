@@ -4,6 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { isValidAdminSecret } from "@/lib/auth";
 import { getRedis } from "@/lib/redis";
 
+interface Subscriber {
+  plan: string;
+  joinedAt: string;
+  [key: string]: unknown;
+}
+
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("x-admin-secret");
   if (!isValidAdminSecret(auth)) {
@@ -25,9 +31,9 @@ export async function GET(req: NextRequest) {
   const subscribers = results
     .map((r) => (typeof r === "string" ? JSON.parse(r) : r))
     .filter(Boolean)
-    .sort((a: any, b: any) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime());
+    .sort((a: Subscriber, b: Subscriber) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime());
 
-  const byPlan = subscribers.reduce((acc: any, s: any) => {
+  const byPlan = subscribers.reduce((acc: Record<string, number>, s: Subscriber) => {
     acc[s.plan] = (acc[s.plan] || 0) + 1;
     return acc;
   }, {});

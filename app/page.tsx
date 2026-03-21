@@ -549,7 +549,7 @@ export default function SmartProIA() {
                     <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-4 flex-1">"{t.text}"</p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4 flex-1">&quot;{t.text}&quot;</p>
                 <div>
                   <div className="text-white font-semibold text-sm">{t.name}</div>
                   <div className="text-slate-600 text-xs">{t.role}</div>

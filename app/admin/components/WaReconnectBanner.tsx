@@ -29,7 +29,7 @@ export function WaReconnectBanner() {
   }
 
   useEffect(() => {
-    void check();
+    setTimeout(() => void check(), 0);
     const id = setInterval(() => void check(), 60_000);
     return () => clearInterval(id);
   }, []);
