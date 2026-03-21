@@ -1,0 +1,42 @@
+name: Claude Security Review
+
+on:
+  pull_request:
+    branches: [master, main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  security-review:
+    name: Security Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Security Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            Review this pull request for security issues. Focus on:
+            1. OWASP Top 10 vulnerabilities (injection, XSS, broken auth, etc.)
+            2. Exposed secrets or API keys in code
+            3. Insecure environment variable usage (NEXT_PUBLIC_ for secrets)
+            4. Input validation gaps in API routes
+            5. Missing authorization checks in Next.js route handlers
+            6. Upstash Redis key injection risks
+            7. Mercado Pago payment flow integrity
+
+            For each issue found:
+            - State the file and line number
+            - Explain the risk (severity: high/medium/low)
+            - Suggest the fix
+
+            If no issues found, confirm the PR looks secure.

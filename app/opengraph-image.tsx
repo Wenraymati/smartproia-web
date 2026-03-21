@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "SmartProIA — Señales Crypto con IA";
+export const alt = "SmartProIA — Bots de WhatsApp con IA para tu negocio";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -28,7 +28,7 @@ export default async function Image() {
             position: "absolute",
             inset: 0,
             backgroundImage:
-              "linear-gradient(rgba(6,182,212,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.04) 1px, transparent 1px)",
+              "linear-gradient(rgba(37,211,102,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(37,211,102,0.04) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
@@ -42,7 +42,7 @@ export default async function Image() {
             width: 900,
             height: 600,
             background:
-              "radial-gradient(ellipse, rgba(6,182,212,0.18) 0%, transparent 65%)",
+              "radial-gradient(ellipse, rgba(37,211,102,0.18) 0%, transparent 65%)",
           }}
         />
         {/* Content */}
@@ -72,7 +72,7 @@ export default async function Image() {
               style={{
                 fontSize: 52,
                 fontWeight: 900,
-                color: "#06b6d4",
+                color: "#22c55e",
                 letterSpacing: "-2px",
               }}
             >
@@ -83,11 +83,11 @@ export default async function Image() {
           {/* Badge */}
           <div
             style={{
-              background: "rgba(6,182,212,0.08)",
-              border: "1px solid rgba(6,182,212,0.25)",
+              background: "rgba(37,211,102,0.08)",
+              border: "1px solid rgba(37,211,102,0.25)",
               borderRadius: 100,
               padding: "8px 22px",
-              color: "#06b6d4",
+              color: "#25D366",
               fontSize: 15,
               fontWeight: 600,
               marginBottom: 36,
@@ -95,13 +95,13 @@ export default async function Image() {
               alignItems: "center",
             }}
           >
-            🇨🇱 Bot activo · Análisis autónomo 24/7
+            🇨🇱 Bots activos · Operando desde Chile
           </div>
 
           {/* Headline */}
           <div
             style={{
-              fontSize: 60,
+              fontSize: 58,
               fontWeight: 900,
               color: "#ffffff",
               textAlign: "center",
@@ -111,13 +111,13 @@ export default async function Image() {
               display: "flex",
             }}
           >
-            Señales Crypto con IA
+            Bots de WhatsApp con IA
           </div>
           <div
             style={{
-              fontSize: 60,
+              fontSize: 58,
               fontWeight: 900,
-              color: "#06b6d4",
+              color: "#25D366",
               textAlign: "center",
               lineHeight: 1.1,
               letterSpacing: "-2px",
@@ -125,33 +125,21 @@ export default async function Image() {
               display: "flex",
             }}
           >
-            Cada mañana a las 6AM
+            para tu negocio
           </div>
 
-          {/* Signal pills */}
-          <div style={{ display: "flex", gap: 14 }}>
-            {[
-              { text: "🟢 GO", bg: "rgba(20,83,45,0.5)", border: "rgba(34,197,94,0.35)", color: "#4ade80" },
-              { text: "🟡 CAUTION", bg: "rgba(66,32,6,0.5)", border: "rgba(234,179,8,0.35)", color: "#facc15" },
-              { text: "🔴 NO-GO", bg: "rgba(69,10,10,0.5)", border: "rgba(239,68,68,0.35)", color: "#f87171" },
-            ].map((s) => (
-              <div
-                key={s.text}
-                style={{
-                  background: s.bg,
-                  border: `1px solid ${s.border}`,
-                  borderRadius: 12,
-                  padding: "14px 28px",
-                  color: s.color,
-                  fontSize: 22,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                {s.text}
-              </div>
-            ))}
+          {/* Subtitle */}
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 500,
+              color: "#94a3b8",
+              textAlign: "center",
+              marginBottom: 44,
+              display: "flex",
+            }}
+          >
+            Automatizá atención, calificá leads y cerrá más ventas
           </div>
 
           {/* URL */}
@@ -159,7 +147,6 @@ export default async function Image() {
             style={{
               color: "#334155",
               fontSize: 20,
-              marginTop: 44,
               display: "flex",
             }}
           >

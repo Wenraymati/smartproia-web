@@ -32,7 +32,6 @@ function track(event: string) {
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
 type Volume = 'low' | 'mid' | 'high';
-type PlanKey = 'basic' | 'standard' | 'premium';
 
 interface ContactInfo {
   name: string;
@@ -45,6 +44,25 @@ interface QuoteState {
   features: string[];
   contact: ContactInfo;
 }
+
+/* ─── Single plan config ─────────────────────────────────────────────── */
+
+const BOT_PLAN = {
+  name: 'Bot WhatsApp IA',
+  setup: '$499',
+  monthly: '$99',
+  tagline: 'Todo lo que necesitás para automatizar la atención de tu negocio.',
+  features: [
+    '24/7 atención automática',
+    'IA con contexto de tu negocio',
+    'Calificación de leads automática',
+    'Dashboard Chatwoot incluido',
+    'Alertas para casos urgentes',
+    'Sin límite de conversaciones',
+    'Setup en 7 días',
+    '1er mes gratis',
+  ],
+} as const;
 
 /* ─── Data ───────────────────────────────────────────────────────────── */
 
@@ -71,78 +89,6 @@ const FEATURE_OPTIONS = [
   { id: 'cotizar', label: 'Enviar cotizaciones o precios' },
   { id: '24h', label: 'Responder 24/7 fuera de horario' },
 ];
-
-const PLAN_DATA: Record<PlanKey, {
-  name: string;
-  setup: string;
-  monthly: string;
-  tagline: string;
-  features: string[];
-  checkoutPlan: 'basico' | 'pro' | 'wa';
-  highlight: boolean;
-}> = {
-  basic: {
-    name: 'Basic',
-    setup: '$250',
-    monthly: '$60',
-    tagline: 'Para negocios con flujo bajo de consultas que quieren empezar a automatizar.',
-    features: [
-      'Hasta 500 mensajes/mes',
-      '1 número WhatsApp Business',
-      'Hasta 5 flujos de conversación',
-      'Dashboard Chatwoot para tu equipo',
-      'Reporte mensual de conversaciones',
-      'Soporte por email',
-      'Setup en 7 días hábiles',
-    ],
-    checkoutPlan: 'basico',
-    highlight: false,
-  },
-  standard: {
-    name: 'Standard',
-    setup: '$350',
-    monthly: '$90',
-    tagline: 'El más elegido. Ideal para negocios con flujo constante de consultas.',
-    features: [
-      'Mensajes ilimitados',
-      '1 número WhatsApp Business',
-      'Flujos ilimitados',
-      'Dashboard Chatwoot + múltiples agentes',
-      'Reporte semanal detallado',
-      'Soporte por WhatsApp',
-      'Ajustes mensuales incluidos',
-      'Setup en 7 días hábiles',
-    ],
-    checkoutPlan: 'pro',
-    highlight: true,
-  },
-  premium: {
-    name: 'Premium',
-    setup: '$500',
-    monthly: '$150',
-    tagline: 'Para empresas con operación compleja, múltiples sucursales o integraciones.',
-    features: [
-      'Todo lo de Standard',
-      'Múltiples números WhatsApp',
-      'Bot multiagente con escalado',
-      'Integraciones con CRM o sistemas propios',
-      'Gestor dedicado de cuenta',
-      'Reportes personalizados',
-      'SLA de respuesta prioritario',
-      'Setup en 5 días hábiles',
-    ],
-    checkoutPlan: 'wa',
-    highlight: false,
-  },
-};
-
-/* ─── Quote logic ────────────────────────────────────────────────────── */
-
-function computePlan(volume: Volume | null, featureCount: number): PlanKey {
-  if (volume === 'high' || featureCount >= 4) return 'premium';
-  if (volume === 'low' && featureCount <= 1) return 'basic';
-  return 'standard';
-}
 
 /* ─── Progress bar ───────────────────────────────────────────────────── */
 
@@ -474,8 +420,7 @@ function StepResult({
   quote: QuoteState;
   onBack: () => void;
 }) {
-  const planKey = computePlan(quote.volume, quote.features.length);
-  const plan = PLAN_DATA[planKey];
+  const plan = BOT_PLAN;
 
   const industryLabel = INDUSTRIES.find((i) => i.id === quote.industry)?.label ?? quote.industry;
   const volumeLabel = VOLUME_OPTIONS.find((v) => v.id === quote.volume)?.label ?? '';
@@ -485,15 +430,10 @@ function StepResult({
 
   // Build WA pre-filled text including contact name
   const waText = encodeURIComponent(
-    `Hola, soy ${quote.contact.name}. Acabo de cotizar en smartproia.com y me recomendaron el plan ${plan.name} (${plan.setup} setup + ${plan.monthly}/mes).\n\nRubro: ${industryLabel}\nVolumen: ${volumeLabel}\nFunciones: ${featureLabels.join(', ') || 'No seleccionadas'}\n\n¿Podemos avanzar?`
+    `Hola, soy ${quote.contact.name}. Acabo de cotizar en smartproia.com el plan ${plan.name} (${plan.setup} setup + ${plan.monthly}/mes).\n\nRubro: ${industryLabel}\nVolumen: ${volumeLabel}\nFunciones: ${featureLabels.join(', ') || 'No seleccionadas'}\n\n¿Podemos avanzar?`
   );
 
-  // Primary checkout URL
-  const checkoutHref =
-    plan.checkoutPlan === 'wa'
-      ? `${WA_BASE}?text=${waText}`
-      : `/api/checkout?plan=${plan.checkoutPlan}`;
-  const checkoutExternal = plan.checkoutPlan === 'wa';
+  const waHref = `${WA_BASE}?text=${waText}`;
 
   return (
     <div>
@@ -503,29 +443,21 @@ function StepResult({
         </p>
       )}
       <div className="mb-6 flex items-center gap-3">
-        {plan.highlight && (
-          <span className="bg-green-500 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wide">
-            Más popular
-          </span>
-        )}
+        <span className="bg-green-500 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wide">
+          1er mes gratis
+        </span>
         <span className="text-slate-500 text-sm">Plan recomendado</span>
       </div>
 
       {/* Plan header */}
-      <div
-        className={`rounded-2xl p-6 border mb-6 ${
-          plan.highlight
-            ? 'bg-gradient-to-b from-green-950/40 to-slate-900 border-green-500/50 shadow-xl shadow-green-500/10'
-            : 'bg-slate-900/60 border-slate-700'
-        }`}
-      >
-        <h2 className={`text-3xl font-black mb-1 ${plan.highlight ? 'text-green-400' : 'text-white'}`}>
+      <div className="rounded-2xl p-6 border mb-6 bg-gradient-to-b from-green-950/40 to-slate-900 border-green-500/50 shadow-xl shadow-green-500/10">
+        <h2 className="text-3xl font-black mb-1 text-green-400">
           {plan.name}
         </h2>
         <p className="text-slate-400 text-sm mb-5 leading-relaxed">{plan.tagline}</p>
 
         <div className="flex items-baseline gap-3 mb-2">
-          <span className={`text-4xl font-black ${plan.highlight ? 'text-green-400' : 'text-white'}`}>
+          <span className="text-4xl font-black text-green-400">
             {plan.setup}
           </span>
           <span className="text-slate-400 text-sm">setup único</span>
@@ -542,9 +474,7 @@ function StepResult({
         <ul className="space-y-3">
           {plan.features.map((f, i) => (
             <li key={i} className="flex items-start gap-2.5 text-sm text-slate-300">
-              <CheckCircle2
-                className={`w-4 h-4 shrink-0 mt-0.5 ${plan.highlight ? 'text-green-400' : 'text-slate-500'}`}
-              />
+              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-green-400" />
               {f}
             </li>
           ))}
@@ -563,29 +493,16 @@ function StepResult({
         )}
       </div>
 
-      {/* CTAs */}
+      {/* CTA — WhatsApp only */}
       <div className="flex flex-col gap-3 mb-6">
         <a
-          href={checkoutHref}
-          target={checkoutExternal ? '_blank' : undefined}
-          rel={checkoutExternal ? 'noopener noreferrer' : undefined}
-          onClick={() => track(plan.checkoutPlan === 'wa' ? 'cotizar:cta_wa' : 'cotizar:cta_mp')}
-          className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl py-4 transition-all shadow-lg shadow-green-500/20 text-base"
-        >
-          {plan.checkoutPlan === 'wa' ? (
-            <><MessageCircle className="w-4 h-4" /> Consultar por WhatsApp</>
-          ) : (
-            <>Contratar ahora <ChevronRight className="w-4 h-4" /></>
-          )}
-        </a>
-        <a
-          href={`${WA_BASE}?text=${waText}`}
+          href={waHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => track('cotizar:cta_wa')}
-          className="w-full inline-flex items-center justify-center gap-2 border border-slate-700 text-slate-300 hover:border-green-500 hover:text-green-400 font-semibold rounded-xl py-3.5 transition-all text-sm"
+          className="w-full inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl py-4 transition-all shadow-lg shadow-green-500/20 text-base"
         >
-          <MessageCircle className="w-4 h-4" /> Hablar primero por WhatsApp
+          <MessageCircle className="w-4 h-4" /> Consultar por WhatsApp
         </a>
       </div>
 
@@ -621,8 +538,6 @@ export default function CotizarPage() {
     if (n === 5) {
       track('cotizar:complete');
       /* Notify admin with full lead details including contact info */
-      const planKey = computePlan(quote.volume, quote.features.length);
-      const plan = PLAN_DATA[planKey];
       const industryLabel = INDUSTRIES.find((i) => i.id === quote.industry)?.label ?? quote.industry;
       const volumeLabel = VOLUME_OPTIONS.find((v) => v.id === quote.volume)?.label ?? quote.volume ?? '';
       const featureLabels = FEATURE_OPTIONS
@@ -637,9 +552,9 @@ export default function CotizarPage() {
           industry: industryLabel,
           volume: volumeLabel,
           features: featureLabels,
-          plan: plan.name,
-          setup: plan.setup,
-          monthly: plan.monthly,
+          plan: BOT_PLAN.name,
+          setup: BOT_PLAN.setup,
+          monthly: BOT_PLAN.monthly,
         }),
       }).catch(() => {});
     }
@@ -659,7 +574,7 @@ export default function CotizarPage() {
             Tu cotización en 2 minutos
           </h1>
           <p className="text-slate-400 text-sm mt-2">
-            Respondé {TOTAL_STEPS - 1} preguntas y te recomendamos el plan ideal.
+            Respondé {TOTAL_STEPS - 1} preguntas y recibís el detalle de tu plan.
           </p>
         </div>
 

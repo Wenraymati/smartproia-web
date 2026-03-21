@@ -11,7 +11,6 @@ import {
 
 import { Badge } from './components/Badge';
 import { Btn } from './components/Btn';
-import { PriceCard } from './components/PriceCard';
 import { FAQ } from './components/FAQ';
 import { MobileNav } from './components/MobileNav';
 import { StickyCTA } from './components/StickyCTA';
@@ -30,6 +29,18 @@ function track(event: string) {
   }).catch(() => {});
 }
 const WA_CONTACT = 'https://wa.me/56962326907?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20bots%20de%20WhatsApp';
+
+/* ─── Single plan config ─────────────────────────────────────── */
+const SINGLE_PLAN_FEATURES = [
+  '24/7 atención automática',
+  'IA con contexto de tu negocio',
+  'Calificación de leads automática',
+  'Dashboard Chatwoot incluido',
+  'Alertas para casos urgentes',
+  'Sin límite de conversaciones',
+  'Setup en 7 días',
+  '1er mes gratis',
+];
 
 /* ─── Testimonials ───────────────────────────────────────────── */
 const testimonials = [
@@ -301,7 +312,7 @@ export default function SmartProIA() {
           {[
             { n: '7', label: 'Empresas activas' },
             { n: '+2.400', label: 'Mensajes automatizados' },
-            { n: 'Meta', label: 'Business Partner' },
+            { n: 'API oficial', label: 'WhatsApp' },
             { n: 'ES', label: 'Soporte en español' },
           ].map((item, i) => (
             <div key={i} className="text-center">
@@ -452,53 +463,73 @@ export default function SmartProIA() {
 
       {/* ── PRECIOS ── */}
       <section id="precios" className="py-28 px-6 bg-slate-900/20">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <div className="text-center mb-16">
-            <Badge>Planes</Badge>
+            <Badge>Plan único</Badge>
             <h2 className="text-4xl font-black text-white mt-4 mb-4">Inversión clara. Sin sorpresas.</h2>
             <p className="text-slate-400">Setup único + mantenimiento mensual. Sin contratos de permanencia.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <PriceCard
-              title="Starter"
-              price="$150"
-              sub=" USD setup + $80/mes"
-              features={[
-                '1 número WhatsApp Business',
-                'Bot con IA básica (hasta 5 flujos)',
-                'Dashboard Chatwoot para tu equipo',
-                'Reporte mensual de conversaciones',
-                'Soporte por WhatsApp',
-                'Setup en 7 días hábiles',
-              ]}
-              cta="Empezar con Starter"
-              href={WA_CONTACT}
-            />
-            <PriceCard
-              title="Pro"
-              price="$250"
-              sub=" USD setup + $150/mes"
-              highlight={true}
-              features={[
-                'Todo del plan Starter',
-                'Flujos ilimitados + IA avanzada',
-                'Múltiples agentes en Chatwoot',
-                'Reporte semanal detallado',
-                'Integraciones con tus sistemas',
-                'Soporte prioritario y ajustes mensuales',
-              ]}
-              cta="Empezar con Pro"
-              href={WA_CONTACT}
-            />
+          {/* Single plan card */}
+          <div className="relative bg-gradient-to-b from-green-950/40 to-slate-900 border-2 border-green-500/50 rounded-2xl p-8 shadow-xl shadow-green-500/10 mb-6">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <span className="bg-green-500 text-slate-950 text-xs font-black px-4 py-1 rounded-full uppercase tracking-wide">
+                1er mes gratis
+              </span>
+            </div>
+
+            <h3 className="text-2xl font-black text-green-400 mb-1">Bot WhatsApp IA</h3>
+            <p className="text-slate-400 text-sm mb-6">Todo lo que necesitás para automatizar la atención de tu negocio.</p>
+
+            <div className="flex items-baseline gap-3 mb-2">
+              <span className="text-5xl font-black text-white">$499</span>
+              <span className="text-slate-400 text-sm">USD setup único</span>
+            </div>
+            <div className="flex items-baseline gap-2 mb-8">
+              <span className="text-3xl font-bold text-green-400">$99</span>
+              <span className="text-slate-500 text-sm">USD/mes</span>
+            </div>
+
+            <ul className="space-y-3 mb-8">
+              {SINGLE_PLAN_FEATURES.map((f, i) => (
+                <li key={i} className="flex items-center gap-2.5 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-green-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            {/* Two CTAs side by side */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="/cotizar"
+                onClick={() => track('landing:cta_cotizar')}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-slate-950 font-bold rounded-xl py-3.5 transition-all shadow-lg shadow-green-500/20 text-sm"
+              >
+                <ArrowRight className="w-4 h-4" /> Cotizar ahora
+              </a>
+              <a
+                href={WA_DEMO}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track('landing:cta_demo')}
+                className="flex-1 inline-flex items-center justify-center gap-2 border border-slate-700 text-slate-300 hover:border-green-500 hover:text-green-400 font-semibold rounded-xl py-3.5 transition-all text-sm"
+              >
+                <MessageCircle className="w-4 h-4" /> Hablar por WhatsApp
+              </a>
+            </div>
           </div>
 
-          <p className="text-center text-slate-600 text-sm mt-8">
-            ¿Tenés un proyecto a medida o querés cotizar antes?{' '}
-            <a href="/cotizar" className="text-green-400/70 hover:text-green-400 underline underline-offset-2 transition-colors">
-              Cotizá en 2 minutos
-            </a>{' '}
-            o escribinos y lo evaluamos juntos.
+          <p className="text-center text-slate-600 text-sm mt-4">
+            ¿Necesitás algo más complejo?{' '}
+            <a
+              href={WA_DEMO}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-400/70 hover:text-green-400 underline underline-offset-2 transition-colors"
+            >
+              Hablemos
+            </a>
           </p>
         </div>
       </section>
@@ -518,7 +549,7 @@ export default function SmartProIA() {
                     <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-4 flex-1">"{t.text}"</p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4 flex-1">&quot;{t.text}&quot;</p>
                 <div>
                   <div className="text-white font-semibold text-sm">{t.name}</div>
                   <div className="text-slate-600 text-xs">{t.role}</div>
@@ -591,11 +622,13 @@ export default function SmartProIA() {
               </div>
               <div className="text-xs text-slate-600">smartproia.com · hola@smartproia.com</div>
             </div>
-            <div className="flex gap-6 text-xs text-slate-600">
+            <div className="flex flex-wrap gap-6 text-xs text-slate-600">
               <a href="#como-funciona" className="hover:text-slate-400 transition-colors">Cómo funciona</a>
               <a href="#casos" className="hover:text-slate-400 transition-colors">Casos de uso</a>
               <a href="#precios" className="hover:text-slate-400 transition-colors">Precios</a>
+              <a href="/pricing" className="hover:text-slate-400 transition-colors">Planes</a>
               <a href="/cotizar" className="hover:text-slate-400 transition-colors">Cotizar</a>
+              <Link href="/casos/ruizruiz" className="hover:text-slate-400 transition-colors">Caso Ruiz &amp; Ruiz</Link>
               <a href="#faq" className="hover:text-slate-400 transition-colors">FAQ</a>
               <a href={WA_CONTACT} target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">Contacto</a>
             </div>
