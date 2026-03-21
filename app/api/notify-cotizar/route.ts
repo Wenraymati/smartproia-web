@@ -75,7 +75,12 @@ export async function POST(req: NextRequest) {
   const redis = getRedis();
 
   /* Save to Redis with 30-day TTL */
-  const leadData = { ...body, id, createdAt: new Date().toISOString() };
+  const leadData = {
+    ...body,
+    id,
+    createdAt: new Date().toISOString(),
+    status: "nuevo" as const,
+  };
   await Promise.all([
     redis.set(`cotizar:lead:${id}`, JSON.stringify(leadData), { ex: 86400 * 30 }),
     redis.lpush("cotizar:leads", id),
