@@ -94,14 +94,14 @@ interface PostBody {
   action: "toggle" | "run";
 }
 
-function getBaseUrl(): string {
+function getBaseUrl(req: NextRequest): string {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
+  // Use the incoming request host — reliable for same-origin server-to-server calls
+  const host = req.headers.get("host") ?? "localhost:3000";
+  const proto = host.includes("localhost") ? "http" : "https";
+  return `${proto}://${host}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
   }
 
   const cronSecret = process.env.CRON_SECRET ?? "";
-  const baseUrl = getBaseUrl();
+  const baseUrl = getBaseUrl(req);
 
   try {
     const cronRes = await fetch(`${baseUrl}${def.endpoint}`, {
