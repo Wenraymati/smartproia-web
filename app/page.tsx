@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { PublicStats } from './api/stats/route';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   ArrowRight, Bot, CheckCircle2, MessageCircle, Star, Shield,
   Users, Smartphone, Zap, Clock, BarChart3, Headphones,
@@ -37,6 +38,7 @@ const testimonials = [
     role: 'Estudio jurídico, Santiago',
     text: 'El bot atiende consultas de honorarios y agenda reuniones automáticamente. Ahora mi equipo se enfoca en los casos, no en responder WhatsApp.',
     stars: 5,
+    caseStudyUrl: '/casos/ruizruiz',
   },
   {
     name: 'Marcelo F.',
@@ -510,16 +512,24 @@ export default function SmartProIA() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <div key={i} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+              <div key={i} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col">
                 <div className="flex mb-3">
                   {[...Array(t.stars)].map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-4">"{t.text}"</p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4 flex-1">"{t.text}"</p>
                 <div>
                   <div className="text-white font-semibold text-sm">{t.name}</div>
                   <div className="text-slate-600 text-xs">{t.role}</div>
+                  {'caseStudyUrl' in t && t.caseStudyUrl && (
+                    <Link
+                      href={t.caseStudyUrl}
+                      className="inline-flex items-center gap-1 text-xs text-green-400 hover:text-green-300 mt-2 transition-colors"
+                    >
+                      Ver caso completo <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
